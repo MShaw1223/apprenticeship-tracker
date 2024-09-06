@@ -1,0 +1,91 @@
+import { Button, StandardButton, GridBox } from "std-widgets.slint";
+import { Entry } from "./components/entryform.slint";
+import { SubmitButton } from "./components/submitButton.slint";
+import { OutputModal, Output } from "./components/outputmodal.slint";
+import { OkButton } from "./components/okbutton.slint";
+import { Menu } from "./components/menu.slint";
+import { EntryPage } from "components/entrypage.slint";
+
+export component AppWindow inherits Window {
+
+    in-out property <string> company;
+    in-out property <string> role;
+    in-out property <string> pay;
+    in-out property <string> area;
+    in-out property <string> sector;
+    in-out property <string> level;
+    in-out property <string> requirements;
+    in-out property <string> date_applied;
+    in-out property <string> stage;
+    in-out property <string> close_date;
+    in-out property <string> notes;
+    in-out property <string> output:"";
+    in-out property <string> choice: "entry";
+
+    callback send-entry({
+        company: string,
+        role:string,
+        pay:string,
+        area: string,
+        sector: string,
+        level: string,
+        requirements: string,
+        date_applied: string,
+        stage: string,
+        close_date: string,
+        notes: string
+    });
+
+    // callback change-page({
+    //     choice: string,
+    // });
+
+    title:"Apprenticeship Tracker";
+    min-width: 900px;
+    min-height: 450px;
+    GridLayout {
+        Row {
+            Menu {
+                choice <=> choice;
+            }
+        }
+        Row {
+            EntryPage {
+                visible: root.choice == "entry";
+                company <=> company;
+                role <=> role;
+                pay <=> pay;
+                area <=> area;
+                sector <=> sector;
+                level <=> level;
+                requirements <=> requirements;
+                date_applied <=> date_applied;
+                stage <=> stage;
+                close_date <=> close_date;
+                notes <=> notes;
+                output <=> output;
+            }
+            Text {
+                visible: root.choice == "view";
+                text: "View Page";
+            }
+        }
+    }
+    OutputModal {
+        visible: root.output != "";
+        GridLayout {
+            Row {
+                Output {
+                    text: root.output;
+                }
+            }
+            Row {
+                OkButton {
+                    clicked => {
+                        root.output = ""
+                    }
+                }
+            }
+        }
+    }
+}

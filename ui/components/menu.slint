@@ -1,0 +1,29 @@
+import { Button } from "std-widgets.slint";
+
+component SelectorButton inherits Button {
+    height: 40px;
+    width: 300px;
+}
+
+export component Menu inherits GridLayout {
+    in-out property <string> choice: "entry";
+
+    // callback change-page({
+    //     output: string,
+    // });
+
+    Row {
+        SelectorButton {
+            text: "Enter";
+            clicked => {
+                root.choice = "entry";
+            }
+        }
+        SelectorButton {
+            text: "View";
+            clicked => {
+                root.choice = "view";
+            }
+        }
+    }
+}

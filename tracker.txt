@@ -1,0 +1,22 @@
+    let user_query = "
+        CREATE TABLE user (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name VARCHAR(30) NOT NULL
+        )";
+    let appr_query = "
+        CREATE TABLE apprenticeship (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INT NOT NULL,
+            area VARCHAR(100) NOT NULL,
+            close_date TEXT NOT NULL,
+            company VARCHAR(100) NOT NULL,
+            date_applied TEXT NOT NULL,
+            level SMALLINT NOT NULL,
+            notes TEXT NOT NULL,
+            pay REAL NOT NULL,
+            requirements TEXT,
+            role VARCHAR(100) NOT NULL,
+            sector VARCHAR(100) NOT NULL,
+            stage VARCHAR(50) NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES user(id)
+        )";
