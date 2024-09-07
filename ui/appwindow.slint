@@ -21,6 +21,7 @@ export component AppWindow inherits Window {
     in-out property <string> notes;
     in-out property <string> output:"";
     in-out property <string> choice: "entry";
+    in-out property <bool> view: false;
 
     callback send-entry({
         company: string,
@@ -36,9 +37,7 @@ export component AppWindow inherits Window {
         notes: string
     });
 
-    // callback change-page({
-    //     choice: string,
-    // });
+    callback view-page({});
 
     title:"Apprenticeship Tracker";
     min-width: 900px;
@@ -46,10 +45,12 @@ export component AppWindow inherits Window {
     GridLayout {
         Row {
             Menu {
+                spacing-horizontal: 50px;
                 choice <=> choice;
+                view <=> view;
+                output <=> output;
             }
         }
-        Row {
             EntryPage {
                 visible: root.choice == "entry";
                 company <=> company;
@@ -68,8 +69,8 @@ export component AppWindow inherits Window {
             Text {
                 visible: root.choice == "view";
                 text: "View Page";
+                horizontal-alignment: center;
             }
-        }
     }
     OutputModal {
         visible: root.output != "";

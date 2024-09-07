@@ -4,7 +4,7 @@ pub mod db_interactor {
     pub struct DBInteractor;
     pub trait Interactions {
         fn insert_appr(&self, area:&str, close_date: &str, company: &str,date_applied: &str, level: i8, notes:&str, pay: f64, requirements: &str, role:&str, sector: &str, stage: &str) -> Result<(),()>;
-        fn select(&self) -> Result<(),()>;
+        fn select(&self) -> Result<Vec<std::string::String>,()>;
         //  fn update(&self) -> Result<(),()>;
         //  fn delete(&self) -> Result<(),()>;
     }
@@ -30,15 +30,14 @@ pub mod db_interactor {
             insert_stmnt.bind((":sector", sector)).unwrap();
             insert_stmnt.bind((":stage", stage)).unwrap();
 
-            // execute w/ data bound to params
+            // executes
             insert_stmnt.next().unwrap();
 
             Ok(())
         }
-        fn select(&self) -> Result<(),()> {
+        fn select(&self) -> Result<Vec<std::string::String>,()> {
             const USER_ID: i64 = 1;
             let connection = sqlite::open(DB_PATH).unwrap();
-            println!("select");
 
             let query = "SELECT * FROM apprenticeship WHERE user_id = (SELECT id FROM user where id = :id)";
 
@@ -46,12 +45,37 @@ pub mod db_interactor {
 
             statement.bind((":id",USER_ID)).unwrap();
 
+            let mut ret = Vec::new();
+
             while let Ok(State::Row) = statement.next() {
-                println!("user_id = {}",statement.read::<String, _>("user_id").unwrap());
-                println!("company = {}",statement.read::<String, _>("company").unwrap());
+                ret.push(statement.read::<String,_>("id").unwrap());
+
+                ret.push(statement.read::<String, _>("user_id").unwrap());
+
+                ret.push(statement.read::<String, _>("company").unwrap());
+
+                ret.push(statement.read::<String,_>("role").unwrap());
+
+                ret.push(statement.read::<String,_>("pay").unwrap());
+
+                ret.push(statement.read::<String,_>("area").unwrap());
+
+                ret.push(statement.read::<String,_>("sector").unwrap());
+
+                ret.push(statement.read::<String,_>("level").unwrap());
+
+                ret.push(statement.read::<String,_>("requirements").unwrap());
+
+                ret.push(statement.read::<String,_>("date_applied").unwrap());
+
+                ret.push(statement.read::<String,_>("stage").unwrap());
+
+                ret.push(statement.read::<String,_>("close_date").unwrap());
+
+                ret.push(statement.read::<String,_>("notes").unwrap());
             }
 
-            Ok(())
+            Ok(ret)
         }
     }
 }

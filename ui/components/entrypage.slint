@@ -73,8 +73,8 @@ export component EntryPage inherits GridLayout{
                     close_date = "";
                     notes = "";
                 }
-                if !( company != "" && role != "" && pay != "" && area != "" && sector != "" && level != "" && requirements!= "" && date_applied != "" && stage != "" && close_date != "" && notes != "") {
-                    root.output = "error"
+                if ( company == "" && role == "" && pay == "" && area == "" && sector == "" && level == "" && requirements== "" && date_applied == "" && stage == "" && close_date == "" && notes == "") {
+                    root.output = "Ensure all fields are entered..."
                 }
             }
         }

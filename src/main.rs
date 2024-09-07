@@ -9,6 +9,9 @@ fn main() -> Result<(), slint::PlatformError> {
     let ui_handle = ui.as_weak();
     const  DB: DBInteractor = DBInteractor;
     ui.on_send_entry({
+        // clone to enable use in other callbacks
+        // let ui_handle = ui_handle.clone();
+
         // Closures allow inferred input & return Types.
         move |payload| {
             let ui = ui_handle.unwrap();
@@ -16,7 +19,7 @@ fn main() -> Result<(), slint::PlatformError> {
             // Destructure payload (user input) tuple to vars
             let (area, close_date, company, date_applied, level_str, notes, pay_str, requirements, role, sector, stage) = payload;
 
-            // change levle and pay from &str to appropriate T
+            // change level and pay from &str to appropriate T
             let level: i8 = level_str.parse().unwrap_or(0);
             let pay: f64 = pay_str.parse().unwrap_or(0.0);
 
@@ -30,8 +33,13 @@ fn main() -> Result<(), slint::PlatformError> {
         }
         // Date should be format: YYYY-MM-DD // is stored in format DD-MM-YYYY
     });
+
     match DB.select() {
-        Ok(()) => ui.set_output("Select success".into()),
+        Ok(data) => {
+            let dat = format!("{:?}",data);
+            // ui.set_output("Select success".into());
+            ui.set_output(dat.into());
+        },
         Err(e) => {
             ui.set_output("Error fetching data".into());
             println!("Error with select: {:?}",e);
