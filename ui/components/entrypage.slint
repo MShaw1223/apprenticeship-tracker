@@ -1,5 +1,5 @@
 import { SubmitButton } from "submitbutton.slint";
-import { Entry } from "entryform.slint";
+import { EntryForm } from "entryform.slint";
 
 export component EntryPage inherits GridLayout{
     in-out property <string> company;
@@ -29,7 +29,7 @@ export component EntryPage inherits GridLayout{
         notes: string
     });
     Row {
-        Entry {
+        EntryForm {
             company <=> company;
             role <=> role;
             pay <=> pay;
@@ -73,7 +73,7 @@ export component EntryPage inherits GridLayout{
                     close_date = "";
                     notes = "";
                 }
-                if ( company == "" && role == "" && pay == "" && area == "" && sector == "" && level == "" && requirements== "" && date_applied == "" && stage == "" && close_date == "" && notes == "") {
+                else {
                     root.output = "Ensure all fields are entered..."
                 }
             }

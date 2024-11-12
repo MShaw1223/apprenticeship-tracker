@@ -1,15 +1,41 @@
 pub mod db_interactor {
     use sqlite::{State, Statement};
-    const DB_PATH: &str = "/Users/miller/Coding/rust/apprenticeship-tracker/tracker.db";
+    const DB_PATH: &str = "/Users/miller/coding/projects/apprenticeship-tracker/tracker.db";
     pub struct DBInteractor;
     pub trait Interactions {
-        fn insert_appr(&self, area:&str, close_date: &str, company: &str,date_applied: &str, level: i8, notes:&str, pay: f64, requirements: &str, role:&str, sector: &str, stage: &str) -> Result<(),()>;
-        fn select(&self) -> Result<Vec<std::string::String>,()>;
+        fn insert_appr(
+            &self,
+            area: &str,
+            close_date: &str,
+            company: &str,
+            date_applied: &str,
+            level: i8,
+            notes: &str,
+            pay: f64,
+            requirements: &str,
+            role: &str,
+            sector: &str,
+            stage: &str,
+        ) -> Result<(), ()>;
+        fn select(&self) -> Result<Vec<std::string::String>, ()>;
         //  fn update(&self) -> Result<(),()>;
         //  fn delete(&self) -> Result<(),()>;
     }
     impl Interactions for DBInteractor {
-        fn insert_appr(&self, area:&str, close_date: &str, company: &str,date_applied: &str, level: i8, notes:&str, pay: f64, requirements: &str, role:&str, sector: &str, stage: &str) -> Result<(), ()> {
+        fn insert_appr(
+            &self,
+            area: &str,
+            close_date: &str,
+            company: &str,
+            date_applied: &str,
+            level: i8,
+            notes: &str,
+            pay: f64,
+            requirements: &str,
+            role: &str,
+            sector: &str,
+            stage: &str,
+        ) -> Result<(), ()> {
             const USER_ID: i64 = 1;
             let connection = sqlite::open(DB_PATH).unwrap();
 
@@ -23,7 +49,7 @@ pub mod db_interactor {
             insert_stmnt.bind((":company", company)).unwrap();
             insert_stmnt.bind((":date_applied", date_applied)).unwrap();
             insert_stmnt.bind((":level", level as i64)).unwrap();
-            insert_stmnt.bind((":notes",notes)).unwrap();
+            insert_stmnt.bind((":notes", notes)).unwrap();
             insert_stmnt.bind((":pay", pay)).unwrap();
             insert_stmnt.bind((":requirements", requirements)).unwrap();
             insert_stmnt.bind((":role", role)).unwrap();
@@ -35,47 +61,48 @@ pub mod db_interactor {
 
             Ok(())
         }
-        fn select(&self) -> Result<Vec<std::string::String>,()> {
+        fn select(&self) -> Result<Vec<std::string::String>, ()> {
             const USER_ID: i64 = 1;
             let connection = sqlite::open(DB_PATH).unwrap();
 
-            let query = "SELECT * FROM apprenticeship WHERE user_id = (SELECT id FROM user where id = :id)";
+            let query =
+                "SELECT * FROM apprenticeship WHERE user_id = (SELECT id FROM user where id = :id)";
 
             let mut statement = connection.prepare(query).unwrap();
 
-            statement.bind((":id",USER_ID)).unwrap();
+            statement.bind((":id", USER_ID)).unwrap();
 
-            let mut ret = Vec::new();
+            let mut payload = Vec::new();
 
             while let Ok(State::Row) = statement.next() {
-                ret.push(statement.read::<String,_>("id").unwrap());
+                payload.push(statement.read::<String, _>("id").unwrap());
 
-                ret.push(statement.read::<String, _>("user_id").unwrap());
+                payload.push(statement.read::<String, _>("user_id").unwrap());
 
-                ret.push(statement.read::<String, _>("company").unwrap());
+                payload.push(statement.read::<String, _>("company").unwrap());
 
-                ret.push(statement.read::<String,_>("role").unwrap());
+                payload.push(statement.read::<String, _>("role").unwrap());
 
-                ret.push(statement.read::<String,_>("pay").unwrap());
+                payload.push(statement.read::<String, _>("pay").unwrap());
 
-                ret.push(statement.read::<String,_>("area").unwrap());
+                payload.push(statement.read::<String, _>("area").unwrap());
 
-                ret.push(statement.read::<String,_>("sector").unwrap());
+                payload.push(statement.read::<String, _>("sector").unwrap());
 
-                ret.push(statement.read::<String,_>("level").unwrap());
+                payload.push(statement.read::<String, _>("level").unwrap());
 
-                ret.push(statement.read::<String,_>("requirements").unwrap());
+                payload.push(statement.read::<String, _>("requirements").unwrap());
 
-                ret.push(statement.read::<String,_>("date_applied").unwrap());
+                payload.push(statement.read::<String, _>("date_applied").unwrap());
 
-                ret.push(statement.read::<String,_>("stage").unwrap());
+                payload.push(statement.read::<String, _>("stage").unwrap());
 
-                ret.push(statement.read::<String,_>("close_date").unwrap());
+                payload.push(statement.read::<String, _>("close_date").unwrap());
 
-                ret.push(statement.read::<String,_>("notes").unwrap());
+                payload.push(statement.read::<String, _>("notes").unwrap());
             }
 
-            Ok(ret)
+            Ok(payload)
         }
     }
 }

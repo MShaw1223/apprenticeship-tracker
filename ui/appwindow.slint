@@ -1,10 +1,9 @@
 import { Button, StandardButton, GridBox } from "std-widgets.slint";
-import { Entry } from "./components/entryform.slint";
 import { SubmitButton } from "./components/submitButton.slint";
 import { OutputModal, Output } from "./components/outputmodal.slint";
 import { OkButton } from "./components/okbutton.slint";
-import { Menu } from "./components/menu.slint";
 import { EntryPage } from "components/entrypage.slint";
+
 
 export component AppWindow inherits Window {
 
@@ -20,8 +19,7 @@ export component AppWindow inherits Window {
     in-out property <string> close_date;
     in-out property <string> notes;
     in-out property <string> output:"";
-    in-out property <string> choice: "entry";
-    in-out property <bool> view: false;
+    in-out property <string> select_result: "";
 
     callback send-entry({
         company: string,
@@ -37,41 +35,32 @@ export component AppWindow inherits Window {
         notes: string
     });
 
-    callback view-page({});
-
     title:"Apprenticeship Tracker";
     min-width: 900px;
     min-height: 450px;
     GridLayout {
-        Row {
-            Menu {
-                spacing-horizontal: 50px;
-                choice <=> choice;
-                view <=> view;
-                output <=> output;
-            }
+        EntryPage {
+            company <=> company;
+            role <=> role;
+            pay <=> pay;
+            area <=> area;
+            sector <=> sector;
+            level <=> level;
+            requirements <=> requirements;
+            date_applied <=> date_applied;
+            stage <=> stage;
+            close_date <=> close_date;
+            notes <=> notes;
+            output <=> output;
         }
-            EntryPage {
-                visible: root.choice == "entry";
-                company <=> company;
-                role <=> role;
-                pay <=> pay;
-                area <=> area;
-                sector <=> sector;
-                level <=> level;
-                requirements <=> requirements;
-                date_applied <=> date_applied;
-                stage <=> stage;
-                close_date <=> close_date;
-                notes <=> notes;
-                output <=> output;
-            }
-            Text {
-                visible: root.choice == "view";
-                text: "View Page";
-                horizontal-alignment: center;
-            }
     }
+
+    Rectangle {
+        Text {
+            text: select_result;
+        }
+    }
+
     OutputModal {
         visible: root.output != "";
         GridLayout {
