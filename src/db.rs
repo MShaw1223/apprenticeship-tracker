@@ -17,7 +17,7 @@ pub mod db_interactor {
             sector: &str,
             stage: &str,
         ) -> Result<(), String>;
-        fn select(&self) -> Result<Vec<std::string::String>, ()>;
+        fn select(&self) -> Result<Vec<Vec<String>>, ()>;
         //  fn update(&self) -> Result<(),()>;
         //  fn delete(&self) -> Result<(),()>;
     }
@@ -70,7 +70,7 @@ pub mod db_interactor {
                 Err(e) => Err(format!("Error executing insert statement: {}", e)),
             }
         }
-        fn select(&self) -> Result<Vec<std::string::String>, ()> {
+        fn select(&self) -> Result<Vec<Vec<String>>, ()> {
             const USER_ID: i64 = 1;
             let connection = sqlite::open(DB_PATH).unwrap();
 
@@ -83,32 +83,36 @@ pub mod db_interactor {
 
             let mut payload = Vec::new();
 
+            // IMPORTANT: this works for apprenticeship table only. If any new added in future logic will need adjusting.
             while let Ok(State::Row) = statement.next() {
-                payload.push(statement.read::<String, _>("id").unwrap());
+                let mut row = Vec::new();
+                row.push(statement.read::<String, _>("id").unwrap());
 
-                payload.push(statement.read::<String, _>("user_id").unwrap());
+                row.push(statement.read::<String, _>("user_id").unwrap());
 
-                payload.push(statement.read::<String, _>("company").unwrap());
+                row.push(statement.read::<String, _>("company").unwrap());
 
-                payload.push(statement.read::<String, _>("role").unwrap());
+                row.push(statement.read::<String, _>("role").unwrap());
 
-                payload.push(statement.read::<String, _>("pay").unwrap());
+                row.push(statement.read::<String, _>("pay").unwrap());
 
-                payload.push(statement.read::<String, _>("area").unwrap());
+                row.push(statement.read::<String, _>("area").unwrap());
 
-                payload.push(statement.read::<String, _>("sector").unwrap());
+                row.push(statement.read::<String, _>("sector").unwrap());
 
-                payload.push(statement.read::<String, _>("level").unwrap());
+                row.push(statement.read::<String, _>("level").unwrap());
 
-                payload.push(statement.read::<String, _>("requirements").unwrap());
+                row.push(statement.read::<String, _>("requirements").unwrap());
 
-                payload.push(statement.read::<String, _>("date_applied").unwrap());
+                row.push(statement.read::<String, _>("date_applied").unwrap());
 
-                payload.push(statement.read::<String, _>("stage").unwrap());
+                row.push(statement.read::<String, _>("stage").unwrap());
 
-                payload.push(statement.read::<String, _>("close_date").unwrap());
+                row.push(statement.read::<String, _>("close_date").unwrap());
 
-                payload.push(statement.read::<String, _>("notes").unwrap());
+                row.push(statement.read::<String, _>("notes").unwrap());
+
+                payload.push(row);
             }
 
             Ok(payload)

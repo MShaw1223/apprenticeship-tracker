@@ -76,14 +76,13 @@ fn main() -> Result<(), slint::PlatformError> {
         move || {
             let ui = ui_handle.unwrap();
             match DB.select() {
-                Ok(data) => {
-                    let output = format!("{:?}", data);
-                    // ui.set_output("Select success".into());
+                Ok(listings) => {
+                    let output = format!("{:?}", listings);
                     println!("{}", output.clone());
                     ui.set_select_result(output.clone().into());
                 }
                 Err(e) => {
-                    let ret_str = format!("Error fetching data: {:?}", e);
+                    let ret_str = format!("Error fetching listings: {:?}", e);
                     ui.set_output(ret_str.into());
                 }
             }
