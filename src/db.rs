@@ -1,6 +1,6 @@
 pub mod db_interactor {
     use sqlite::{State, Statement};
-    const DB_PATH: &str = "/Users/miller/coding/projects/apprenticeship-tracker/tracker.db";
+    const DB_PATH: &str = "/Users/miller/Coding/projects/apprenticeship-tracker/tracker.db";
     pub struct DBInteractor;
     pub trait Interactions {
         fn insert_appr(

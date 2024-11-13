@@ -48,7 +48,10 @@ fn main() -> Result<(), slint::PlatformError> {
                 sector.as_str(),
                 stage.as_str(),
             ) {
-                Ok(()) => ui.set_output("Apprenticeship recorded successfully !".into()),
+                Ok(()) => {
+                    println!("Success");
+                    ui.set_output("Apprenticeship recorded successfully !".into())
+                }
                 Err(e) => {
                     ui.set_output("Error recording apprenticeship details :(".into());
                     println!("Error with insert: {:?}", e)
