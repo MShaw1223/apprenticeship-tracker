@@ -2,11 +2,9 @@ import { Button, StandardButton, GridBox } from "std-widgets.slint";
 import { SubmitButton } from "./components/submitButton.slint";
 import { OutputModal, Output } from "./components/outputmodal.slint";
 import { OkButton } from "./components/okbutton.slint";
-import { EntryPage } from "components/entrypage.slint";
-
+import { EntryForm } from "./components/entryform.slint";
 
 export component AppWindow inherits Window {
-
     in-out property <string> company;
     in-out property <string> role;
     in-out property <string> pay;
@@ -19,7 +17,7 @@ export component AppWindow inherits Window {
     in-out property <string> close_date;
     in-out property <string> notes;
     in-out property <string> output:"";
-    in-out property <string> select_result: "";
+    in property <string> select_result: "";
 
     callback send-entry({
         company: string,
@@ -34,33 +32,65 @@ export component AppWindow inherits Window {
         close_date: string,
         notes: string
     });
+    callback get-entries();
 
     title:"Apprenticeship Tracker";
     min-width: 900px;
     min-height: 450px;
     GridLayout {
-        EntryPage {
-            company <=> company;
-            role <=> role;
-            pay <=> pay;
-            area <=> area;
-            sector <=> sector;
-            level <=> level;
-            requirements <=> requirements;
-            date_applied <=> date_applied;
-            stage <=> stage;
-            close_date <=> close_date;
-            notes <=> notes;
-            output <=> output;
+        padding: 50px;
+        spacing: 25px;
+        Row {
+            EntryForm {
+                company <=> company;
+                role <=> role;
+                pay <=> pay;
+                area <=> area;
+                sector <=> sector;
+                level <=> level;
+                requirements <=> requirements;
+                date_applied <=> date_applied;
+                stage <=> stage;
+                close_date <=> close_date;
+                notes <=> notes;
+            }
+        }
+        Row {
+            SubmitButton {
+                clicked => {
+                    root.output = "Sending Entry";
+                    root.send-entry({
+                        company: "UBS",
+                        role: "SRE",
+                        pay: "27000",
+                        area: "stevenage",
+                        sector: "tech",
+                        level: "0",
+                        requirements: "n/a",
+                        date_applied: "20/10/2024",
+                        stage: "Final interviews",
+                        close_date: "30/10/2024",
+                        notes: "Test input",
+                    });
+                }
+            }
+        }
+        Row {
+            Button {
+                text: "Get";
+                clicked => {
+                    root.get-entries()
+                }
+            }
+        }
+        Row {
+            Rectangle {
+                Text {
+                    text: select_result;
+                }
+            }
         }
     }
-
-    Rectangle {
-        Text {
-            text: select_result;
-        }
-    }
-
     OutputModal {
         visible: root.output != "";
         GridLayout {

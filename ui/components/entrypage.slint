@@ -1,82 +1,38 @@
 import { SubmitButton } from "submitbutton.slint";
 import { EntryForm } from "entryform.slint";
 
-export component EntryPage inherits GridLayout{
-    in-out property <string> company;
-    in-out property <string> role;
-    in-out property <string> pay;
-    in-out property <string> area;
-    in-out property <string> sector;
-    in-out property <string> level;
-    in-out property <string> requirements;
-    in-out property <string> date_applied;
-    in-out property <string> stage;
-    in-out property <string> close_date;
-    in-out property <string> notes;
-    in-out property <string> output: "";
-
-    callback send-entry({
-        company: string,
-        role:string,
-        pay:string,
-        area: string,
-        sector: string,
-        level: string,
-        requirements: string,
-        date_applied: string,
-        stage: string,
-        close_date: string,
-        notes: string
-    });
-    Row {
-        EntryForm {
-            company <=> company;
-            role <=> role;
-            pay <=> pay;
-            area <=> area;
-            sector <=> sector;
-            level <=> level;
-            requirements <=> requirements;
-            date_applied <=> date_applied;
-            stage <=> stage;
-            close_date <=> close_date;
-            notes <=> notes;
-        }
-    }
-    Row {
-        SubmitButton {
-            clicked => {
-                // invokes callback 'send-entry' send_entry in main.rs)
-                if ( company != "" && role != "" && pay != "" && area != "" && sector != "" && level != "" && requirements!= "" && date_applied != "" && stage != "" && close_date != "" && notes != "") {
-                    send-entry({
-                        company: company,
-                        role: role,
-                        pay: pay,
-                        area: area,
-                        sector: sector,
-                        level: level,
-                        requirements: requirements,
-                        date_applied: date_applied,
-                        stage: stage,
-                        close_date: close_date,
-                        notes: notes,
-                    });
-                    company = "";
-                    role = "";
-                    pay = "";
-                    area = "";
-                    sector = "";
-                    level = "";
-                    requirements= "";
-                    date_applied = "";
-                    stage = "";
-                    close_date = "";
-                    notes = "";
-                }
-                else {
-                    root.output = "Ensure all fields are entered..."
-                }
-            }
-        }
-    }
-}
+        // SubmitButton {
+        //     clicked => {
+        //         // invokes callback 'send-entry' send_entry in main.rs)
+        //         if ( company != "" && role != "" && pay != "" && area != "" && sector != "" && level != "" && requirements!= "" && date_applied != "" && stage != "" && close_date != "" && notes != "") {
+        //             root.output = "Sending Entry";
+        //             send-entry({
+        //                 company: company,
+        //                 role: role,
+        //                 pay: pay,
+        //                 area: area,
+        //                 sector: sector,
+        //                 level: level,
+        //                 requirements: requirements,
+        //                 date_applied: date_applied,
+        //                 stage: stage,
+        //                 close_date: close_date,
+        //                 notes: notes,
+        //             });
+        //             // company = "";
+        //             // role = "";
+        //             // pay = "";
+        //             // area = "";
+        //             // sector = "";
+        //             // level = "";
+        //             // requirements= "";
+        //             // date_applied = "";
+        //             // stage = "";
+        //             // close_date = "";
+        //             // notes = "";
+        //         }
+        //         else {
+        //             root.output = "Ensure all fields are entered..."
+        //         }
+        //     }
+        // }

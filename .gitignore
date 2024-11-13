@@ -6,3 +6,4 @@
 **/*.rs.bk
 # my additions
 .DS_store
+*.db

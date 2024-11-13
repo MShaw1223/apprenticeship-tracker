@@ -1,5 +1,5 @@
 pub mod db_interactor {
-    use sqlite::{State, Statement};
+    use sqlite::State;
     const DB_PATH: &str = "/Users/miller/Coding/projects/apprenticeship-tracker/tracker.db";
     pub struct DBInteractor;
     pub trait Interactions {
@@ -16,7 +16,7 @@ pub mod db_interactor {
             role: &str,
             sector: &str,
             stage: &str,
-        ) -> Result<(), ()>;
+        ) -> Result<(), String>;
         fn select(&self) -> Result<Vec<std::string::String>, ()>;
         //  fn update(&self) -> Result<(),()>;
         //  fn delete(&self) -> Result<(),()>;
@@ -35,13 +35,21 @@ pub mod db_interactor {
             role: &str,
             sector: &str,
             stage: &str,
-        ) -> Result<(), ()> {
+        ) -> Result<(), String> {
             const USER_ID: i64 = 1;
-            let connection = sqlite::open(DB_PATH).unwrap();
+            let connection = match sqlite::open(DB_PATH) {
+                Ok(conn) => conn,
+                Err(e) => return Err(format!("Failed to connect to the database: {}", e)),
+            };
 
             print!("Area {area} | Closes {close_date} | Company {company}\nApplied {date_applied} | Level {level} | Notes {notes} | Pay {pay}\nRequirements {requirements} | Role {role} | Sector {sector}\nStage {stage}\n");
 
-            let mut insert_stmnt: Statement = connection.prepare("INSERT INTO apprenticeship (user_id, area, close_date, company, date_applied, level, notes, pay, requirements, role, sector, stage) VALUES (:user_id, :area, :close_date, :company, :date_applied, :level, :notes, :pay, :requirements, :role, :sector, :stage)").unwrap();
+            let query = "INSERT INTO apprenticeship (user_id, area, close_date, company, date_applied, level, notes, pay, requirements, role, sector, stage) VALUES (:user_id, :area, :close_date, :company, :date_applied, :level, :notes, :pay, :requirements, :role, :sector, :stage)";
+            let mut insert_stmnt = match connection.prepare(query) {
+                Ok(stmnt) => stmnt,
+                Err(e) => return Err(format!("Failed to prepare insert statement: {}", e)),
+            };
+
 
             insert_stmnt.bind((":user_id", USER_ID)).unwrap();
             insert_stmnt.bind((":area", area)).unwrap();
@@ -57,9 +65,10 @@ pub mod db_interactor {
             insert_stmnt.bind((":stage", stage)).unwrap();
 
             // executes
-            insert_stmnt.next().unwrap();
-
-            Ok(())
+            match insert_stmnt.next() {
+                Ok(_) => Ok(()),
+                Err(e) => Err(format!("Error executing insert statement: {}", e)),
+            }
         }
         fn select(&self) -> Result<Vec<std::string::String>, ()> {
             const USER_ID: i64 = 1;
