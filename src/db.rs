@@ -1,5 +1,5 @@
 pub mod db_interactor {
-    use sqlite::State;
+    use sqlite::{Error, State};
     const DB_PATH: &str = "/Users/miller/Coding/projects/apprenticeship-tracker/tracker.db";
     pub struct DBInteractor;
     pub trait Interactions {
@@ -16,9 +16,10 @@ pub mod db_interactor {
             role: &str,
             sector: &str,
             stage: &str,
-        ) -> Result<(), String>;
-        fn select(&self) -> Result<Vec<Vec<String>>, ()>;
-        //  fn update(&self) -> Result<(),()>;
+        ) -> Result<(), Error>;
+        fn select(&self) -> Result<Vec<Vec<String>>, Error>;
+        // change string, () to (), string ?
+        fn update(&self, field: &str, new_value: &str, row_id: &i32) -> Result<String, Error>;
         //  fn delete(&self) -> Result<(),()>;
     }
     impl Interactions for DBInteractor {
@@ -35,11 +36,11 @@ pub mod db_interactor {
             role: &str,
             sector: &str,
             stage: &str,
-        ) -> Result<(), String> {
+        ) -> Result<(), Error> {
             const USER_ID: i64 = 1;
             let connection = match sqlite::open(DB_PATH) {
                 Ok(conn) => conn,
-                Err(e) => return Err(format!("Failed to connect to the database: {}", e)),
+                Err(e) => return Err(e),
             };
 
             print!("Area {area} | Closes {close_date} | Company {company}\nApplied {date_applied} | Level {level} | Notes {notes} | Pay {pay}\nRequirements {requirements} | Role {role} | Sector {sector}\nStage {stage}\n");
@@ -47,9 +48,8 @@ pub mod db_interactor {
             let query = "INSERT INTO apprenticeship (user_id, area, close_date, company, date_applied, level, notes, pay, requirements, role, sector, stage) VALUES (:user_id, :area, :close_date, :company, :date_applied, :level, :notes, :pay, :requirements, :role, :sector, :stage)";
             let mut insert_stmnt = match connection.prepare(query) {
                 Ok(stmnt) => stmnt,
-                Err(e) => return Err(format!("Failed to prepare insert statement: {}", e)),
+                Err(e) => return Err(e),
             };
-
 
             insert_stmnt.bind((":user_id", USER_ID)).unwrap();
             insert_stmnt.bind((":area", area)).unwrap();
@@ -67,10 +67,10 @@ pub mod db_interactor {
             // executes
             match insert_stmnt.next() {
                 Ok(_) => Ok(()),
-                Err(e) => Err(format!("Error executing insert statement: {}", e)),
+                Err(e) => Err(e),
             }
         }
-        fn select(&self) -> Result<Vec<Vec<String>>, ()> {
+        fn select(&self) -> Result<Vec<Vec<String>>, Error> {
             const USER_ID: i64 = 1;
             let connection = sqlite::open(DB_PATH).unwrap();
 
@@ -116,6 +116,41 @@ pub mod db_interactor {
             }
 
             Ok(payload)
+        }
+        fn update(&self, field: &str, new_value: &str, row_id: &i32) -> Result<String, Error> {
+            println!("F: {:?}, NV: {:?}, RID: {:?}", field, new_value, row_id);
+            let connection = match sqlite::open(DB_PATH){
+                Ok(conn) => conn,
+                Err(e) => return Err(e)
+            };
+
+            // update *table SET *col = *val WHERE *col = *old AND userid = ID
+            // let query = format!("UPDATE apprenticeship SET {:?} = {:?} WHERE id = {:?}", field, new_value, row_id);
+            let query = "SELECT Notes From Apprenticeship WHERE id = :id";
+
+            let mut update_stmnt = match connection.prepare(&query) {
+                Ok(stmnt) => stmnt,
+                Err(e) => return Err(e),
+            };
+
+            // row_id dereffed to be converted to i64 to allow binding
+            let new_id: i64 = *row_id as i64;
+
+            update_stmnt.bind((":id", new_id)).unwrap();
+
+            let row = match update_stmnt.next(){
+                Ok(sqlite::State::Row) => {
+                    // If a row is available, read the "Notes" field
+                    let notes = update_stmnt.read::<String, _>("notes")?;
+                    Ok(notes)
+                },
+                Ok(sqlite::State::Done) => {
+                    // No row found with the given ID
+                    Err(sqlite::Error{ code: Some(1), message: Some("No Row found for given ID".to_string()) })
+                }
+                Err(e) => Err(e)
+            };
+            row
         }
     }
 }

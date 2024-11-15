@@ -17,7 +17,21 @@ export component AppWindow inherits Window {
     in-out property <string> close_date;
     in-out property <string> notes;
     in-out property <string> output:"";
-    in property <string> select_result: "";
+    in-out property <bool> show: false;
+    in property <string> rid: "";
+    in property <string> uid: "";
+    in property <string> s_company: "";
+    in property <string> s_role: "";
+    in property <string> s_pay: "";
+    in property <string> s_area: "";
+    in property <string> s_sector: "";
+    in property <string> s_level: "";
+    in property <string> s_requirements: "";
+    in property <string> s_date_applied: "";
+    in property <string> s_stage: "";
+    in property <string> s_close_date: "";
+    in property <string> s_notes: "";
+    in property <string> select_result: ""; // delete this
 
     callback send-entry({
         company: string,
@@ -30,16 +44,21 @@ export component AppWindow inherits Window {
         date_applied: string,
         stage: string,
         close_date: string,
-        notes: string
+        notes: string,
     });
-    callback get-entries();
+    callback select-call();
+    callback update-call({
+        field: string,
+        new_value: string,
+        row_id: int,
+    });
 
-    title:"Apprenticeship Tracker";
+    title: "Apprenticeship Tracker";
     min-width: 900px;
     min-height: 450px;
     GridLayout {
         padding: 50px;
-        spacing: 25px;
+        spacing: 15px;
         Row {
             EntryForm {
                 company <=> company;
@@ -55,53 +74,75 @@ export component AppWindow inherits Window {
                 notes <=> notes;
             }
         }
+
         Row {
-            SubmitButton {
-                clicked => {
-                    // invokes callback 'send-entry' send_entry in main.rs)
-                    if ( company != "" && role != "" && pay != "" && area != "" && sector != "" && level != "" && requirements!= "" && date_applied != "" && stage != "" && close_date != "" && notes != "") {
-                        root.output = "Sending Entry";
-                        root.send-entry({
-                            company: company,
-                            role: role,
-                            pay: pay,
-                            area: area,
-                            sector: sector,
-                            level: level,
-                            requirements: requirements,
-                            date_applied: date_applied,
-                            stage: stage,
-                            close_date: close_date,
-                            notes: notes,
-                        });
-                        company = "";
-                        role = "";
-                        pay = "";
-                        area = "";
-                        sector = "";
-                        level = "";
-                        requirements= "";
-                        date_applied = "";
-                        stage = "";
-                        close_date = "";
-                        notes = "";
-                    } else {
-                        root.output = "Ensure all fields are entered...";
+            HorizontalLayout {
+                alignment: space-around;
+                SubmitButton {
+                    clicked => {
+                        // invokes callback 'send-entry' send_entry in main.rs)
+                        if (company != "" && role != "" && pay != "" && area != "" && sector != "" && level != "" && requirements != "" && date_applied != "" && stage != "" && close_date != "" && notes != "") {
+                            root.output = "Sending Entry";
+                            root.show = true;
+                            root.send-entry({
+                                company: company,
+                                role: role,
+                                pay: pay,
+                                area: area,
+                                sector: sector,
+                                level: level,
+                                requirements: requirements,
+                                date_applied: date_applied,
+                                stage: stage,
+                                close_date: close_date,
+                                notes: notes,
+                            });
+                            company = "";
+                            role = "";
+                            pay = "";
+                            area = "";
+                            sector = "";
+                            level = "";
+                            requirements = "";
+                            date_applied = "";
+                            stage = "";
+                            close_date = "";
+                            notes = "";
+                        } else {
+                            root.output = "Ensure all fields are entered...";
+                            root.show = true
+                        }
                     }
                 }
             }
         }
+
         Row {
-            Button {
-                text: "Get";
-                width: 200px;
-                padding: 10px;
-                max-height: 20px;
-                clicked => {
-                    root.get-entries()
+            HorizontalLayout {
+                alignment: space-around;
+                Button {
+                    text: "Get";
+                    width: 200px;
+                    padding: 10px;
+                    max-height: 20px;
+                    clicked => {
+                        root.select-call()
+                    }
+                }
+
+                Button {
+                    text: "Update";
+                    width: 200px;
+                    padding: 10px;
+                    max-height: 20px;
+
+                    clicked => {
+                        root.update-call({ field: "Notes", new_value: "Hello, World !", row_id: 1 })
+                    }
                 }
             }
         }
+
         Row {
             Rectangle {
                 width: 800px;
@@ -116,18 +157,20 @@ export component AppWindow inherits Window {
             }
         }
     }
+
     OutputModal {
-        visible: root.output != "";
+        visible: root.show;
         GridLayout {
             Row {
                 Output {
                     text: root.output;
                 }
             }
+
             Row {
                 OkButton {
                     clicked => {
-                        root.output = ""
+                        root.show = false
                     }
                 }
             }
