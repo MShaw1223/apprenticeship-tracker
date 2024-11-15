@@ -119,14 +119,16 @@ pub mod db_interactor {
         }
         fn update(&self, field: &str, new_value: &str, row_id: &i32) -> Result<String, Error> {
             println!("F: {:?}, NV: {:?}, RID: {:?}", field, new_value, row_id);
-            let connection = match sqlite::open(DB_PATH){
+            let connection = match sqlite::open(DB_PATH) {
                 Ok(conn) => conn,
-                Err(e) => return Err(e)
+                Err(e) => return Err(e),
             };
 
             // update *table SET *col = *val WHERE *col = *old AND userid = ID
-            // let query = format!("UPDATE apprenticeship SET {:?} = {:?} WHERE id = {:?}", field, new_value, row_id);
-            let query = "SELECT Notes From Apprenticeship WHERE id = :id";
+            let query = format!(
+                "UPDATE apprenticeship SET {:?} = {:?} WHERE id = :row_id",
+                field, new_value
+            );
 
             let mut update_stmnt = match connection.prepare(&query) {
                 Ok(stmnt) => stmnt,
@@ -136,19 +138,19 @@ pub mod db_interactor {
             // row_id dereffed to be converted to i64 to allow binding
             let new_id: i64 = *row_id as i64;
 
-            update_stmnt.bind((":id", new_id)).unwrap();
+            update_stmnt.bind((":row_id", new_id)).unwrap();
 
-            let row = match update_stmnt.next(){
+            let row = match update_stmnt.next() {
                 Ok(sqlite::State::Row) => {
                     // If a row is available, read the "Notes" field
                     let notes = update_stmnt.read::<String, _>("notes")?;
                     Ok(notes)
-                },
-                Ok(sqlite::State::Done) => {
-                    // No row found with the given ID
-                    Err(sqlite::Error{ code: Some(1), message: Some("No Row found for given ID".to_string()) })
                 }
-                Err(e) => Err(e)
+                Ok(sqlite::State::Done) => {
+                    // No row found with the given ID? OR finished with iter thru rows
+                    Ok("Information updated !".to_string())
+                }
+                Err(e) => Err(e),
             };
             row
         }

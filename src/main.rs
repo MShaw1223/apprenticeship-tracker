@@ -6,16 +6,15 @@ mod db;
 use std::collections::HashMap;
 
 use db::db_interactor::{DBInteractor, Interactions};
+use slint::ComponentHandle;
 slint::include_modules!();
 
 fn main() -> Result<(), slint::PlatformError> {
     let ui = AppWindow::new()?;
-    let ui_handle = ui.as_weak();
     const DB: DBInteractor = DBInteractor;
 
     ui.on_send_entry({
-        // clone to enable use in other callbacks
-        let ui_handle = ui_handle.clone();
+        let ui_handle = ui.as_weak();
 
         move |payload| {
             let ui = ui_handle.unwrap();
@@ -77,7 +76,7 @@ fn main() -> Result<(), slint::PlatformError> {
         // Date should be format: YYYY-MM-DD // is stored in format DD-MM-YYYY
     });
     ui.on_select_call({
-        let ui_handle = ui_handle.clone();
+        let ui_handle = ui.as_weak();
         move || {
             let ui = ui_handle.unwrap();
             let mut cols: HashMap<i8, &str> = HashMap::new();
@@ -120,12 +119,13 @@ fn main() -> Result<(), slint::PlatformError> {
         }
     });
     ui.on_update_call({
-        let ui_handle = ui_handle.clone();
+        let ui_handle = ui.as_weak();
         move |update_payload| {
             let ui = ui_handle.unwrap();
             println!("Payload recieved: {:?}", update_payload);
             let (field, new_value, id) = update_payload;
-            match DB.update(&field, &new_value, &id) {
+            let converted_id = id.parse::<i32>().unwrap();
+            match DB.update(&field, &new_value, &converted_id) {
                 Ok(msg) => {
                     println!("Message recieved in main.rs: {:?}", msg);
                     ui.set_output(msg.into());

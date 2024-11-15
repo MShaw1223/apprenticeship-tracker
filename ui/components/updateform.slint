@@ -1,0 +1,25 @@
+import { GridBox } from "std-widgets.slint";
+import { Input } from "input.slint";
+export component UpdateForm inherits GridBox {
+    in-out property <string> row-id;
+    in-out property <string> field;
+    in-out property <string> new-value;
+
+    spacing: 3px;
+    Row {
+        row-id := Input {
+            placeholder-text: "Row ID";
+            text <=> root.row-id;
+        }
+
+        field := Input {
+            placeholder-text: "Field to change";
+            text <=> root.field;
+        }
+
+        new-value := Input {
+            placeholder-text: "New Value";
+            text <=> root.new-value;
+        }
+    }
+}
