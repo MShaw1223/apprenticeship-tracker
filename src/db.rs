@@ -43,8 +43,6 @@ pub mod db_interactor {
                 Err(e) => return Err(e),
             };
 
-            print!("Area {area} | Closes {close_date} | Company {company}\nApplied {date_applied} | Level {level} | Notes {notes} | Pay {pay}\nRequirements {requirements} | Role {role} | Sector {sector}\nStage {stage}\n");
-
             let query = "INSERT INTO apprenticeship (user_id, area, close_date, company, date_applied, level, notes, pay, requirements, role, sector, stage) VALUES (:user_id, :area, :close_date, :company, :date_applied, :level, :notes, :pay, :requirements, :role, :sector, :stage)";
             let mut insert_stmnt = match connection.prepare(query) {
                 Ok(stmnt) => stmnt,
@@ -118,7 +116,6 @@ pub mod db_interactor {
             Ok(payload)
         }
         fn update(&self, field: &str, new_value: &str, row_id: &i32) -> Result<String, Error> {
-            println!("F: {:?}, NV: {:?}, RID: {:?}", field, new_value, row_id);
             let connection = match sqlite::open(DB_PATH) {
                 Ok(conn) => conn,
                 Err(e) => return Err(e),

@@ -18,7 +18,6 @@ fn main() -> Result<(), slint::PlatformError> {
 
         move |payload| {
             let ui = ui_handle.unwrap();
-            println!("Data recieved in main.rs closure: {:?}", payload);
             // Destructure payload (user input) tuple to vars
             let (
                 area,
@@ -122,12 +121,10 @@ fn main() -> Result<(), slint::PlatformError> {
         let ui_handle = ui.as_weak();
         move |update_payload| {
             let ui = ui_handle.unwrap();
-            println!("Payload recieved: {:?}", update_payload);
             let (field, new_value, id) = update_payload;
             let converted_id = id.parse::<i32>().unwrap();
             match DB.update(&field, &new_value, &converted_id) {
                 Ok(msg) => {
-                    println!("Message recieved in main.rs: {:?}", msg);
                     ui.set_output(msg.into());
                     ui.set_show(true);
                 }
