@@ -53,180 +53,178 @@ export component AppWindow inherits Window {
     min-height: 550px;
 
     VerticalLayout {
-        spacing: 0px;
-        Menu {
-            alignment: start;
-            padding-top: 0;
-            choice <=> choice;
-        }
-
-        VerticalLayout {
+        HorizontalLayout {
             alignment: center;
-            spacing: 0px;
-            HorizontalLayout {
-                alignment: center;
-                GridLayout {
-                    padding: 20px;
-                    spacing: 10px;
-                    EntryForm {
-                        row: 0;
-                        col: 0;
-                        visible: root.choice == "Add Job Listing";
+            GridLayout {
+                padding: 20px;
+                spacing: 10px;
+                EntryForm {
+                    row: 0;
+                    col: 0;
+                    visible: root.choice == "Add Job Listing";
 
-                        min-height: 200px;
-                        company <=> company;
-                        role <=> role;
-                        pay <=> pay;
-                        area <=> area;
-                        sector <=> sector;
-                        level <=> level;
-                        requirements <=> requirements;
-                        date-applied <=> date-applied;
-                        stage <=> stage;
-                        close-date <=> close-date;
-                        notes <=> notes;
-                    }
+                    min-height: 200px;
+                    company <=> company;
+                    role <=> role;
+                    pay <=> pay;
+                    area <=> area;
+                    sector <=> sector;
+                    level <=> level;
+                    requirements <=> requirements;
+                    date-applied <=> date-applied;
+                    stage <=> stage;
+                    close-date <=> close-date;
+                    notes <=> notes;
+                }
 
-                    HorizontalLayout {
-                        row: 1;
-                        col: 0;
-                        visible: root.choice == "Add Job Listing";
-                        alignment: space-around;
-                        SubmitButton {
-                            clicked => {
-                                if (company != "" && role != "" && pay != "" && area != "" && sector != "" && level != "" && requirements != "" && date-applied != "" && stage != "" && close-date != "" && notes != "") {
-                                    root.output = "Sending Entry";
-                                    root.show = true;
-                                    root.send-entry({
-                                        company: company,
-                                        role: role,
-                                        pay: pay,
-                                        area: area,
-                                        sector: sector,
-                                        level: level,
-                                        requirements: requirements,
-                                        date-applied: date-applied,
-                                        stage: stage,
-                                        close-date: close-date,
-                                        notes: notes,
-                                    });
-                                    company = "";
-                                    role = "";
-                                    pay = "";
-                                    area = "";
-                                    sector = "";
-                                    level = "";
-                                    requirements = "";
-                                    date-applied = "";
-                                    stage = "";
-                                    close-date = "";
-                                    notes = "";
-                                } else {
-                                    root.output = "Ensure all fields are entered...";
-                                    root.show = true;
-                                }
-                            }
-                        }
-                    }
-
-                    GroupBox {
-                        row: 0;
-                        col: 0;
-                        visible: root.choice == "Get Recorded Listings";
-
-                        Rectangle {
-                            padding: 5px;
-                            background: #333;
-                            min-height: 100px;
-                            Text {
-                                width: 100%;
-                                wrap: word-wrap;
-                                color: white;
-                                text: select-result;
-                            }
-                        }
-                    }
-
-                    HorizontalLayout {
-                        visible: root.choice == "Get Recorded Listings";
-                        row: 1;
-                        col: 0;
-                        alignment: space-around;
-                        Button {
-                            text: "Get";
-                            width: 200px;
-                            padding: 5px;
-                            max-height: 20px;
-                            clicked => {
-                                root.select-call();
-                            }
-                        }
-                    }
-
-                    UpdateForm {
-                        row: 0;
-                        col: 0;
-                        row-id <=> row-id;
-                        field <=> field;
-                        new-value <=> new-value;
-                        visible: root.choice == "Update Listings";
-                    }
-
-                    HorizontalLayout {
-                        row: 1;
-                        col: 0;
-                        visible: root.choice == "Update Listings";
-                        alignment: space-around;
-                        Button {
-                            text: "Update";
-                            width: 200px;
-                            padding: 5px;
-                            max-height: 20px;
-
-                            clicked => {
-                                if (field == "" || new-value == "" || row-id == "") {
-                                    root.output = "Ensure all fields are entered...";
-                                    root.show = true;
-                                } else {
-                                    root.update-call({ field: field, new-value: new-value, row-id: row-id });
-                                    field = "";
-                                    new-value = "";
-                                    row-id = "";
-                                }
-                            }
-                        }
-                    }
-
-                    HorizontalLayout {
-                        visible: root.choice == "Delete A Listing";
-                        row: 0;
-                        col: 0;
-
-                        spacing: 5px;
-
-                        delete-id := Input {
-                            text <=> root.delete-id;
-                            placeholder-text: "Enter the row ID you wish to delete";
-                        }
-
-                        Button {
-                            text: "Delete";
-                            width: 200px;
-                            padding: 10px;
-                            height: delete-id.height;
-
-                            clicked => {
-                                if (root.delete-id == "") {
-                                    root.output = "Ensure all fields are entered...";
-                                    root.show = true;
-                                } else {
-                                    root.output = "Delete Pressed";
-                                    root.show = true;
-                                }
+                HorizontalLayout {
+                    row: 1;
+                    col: 0;
+                    visible: root.choice == "Add Job Listing";
+                    alignment: space-around;
+                    SubmitButton {
+                        clicked => {
+                            if (company != "" && role != "" && pay != "" && area != "" && sector != "" && level != "" && requirements != "" && date-applied != "" && stage != "" && close-date != "" && notes != "") {
+                                root.output = "Sending Entry";
+                                root.show = true;
+                                root.send-entry({
+                                    company: company,
+                                    role: role,
+                                    pay: pay,
+                                    area: area,
+                                    sector: sector,
+                                    level: level,
+                                    requirements: requirements,
+                                    date-applied: date-applied,
+                                    stage: stage,
+                                    close-date: close-date,
+                                    notes: notes,
+                                });
+                                company = "";
+                                role = "";
+                                pay = "";
+                                area = "";
+                                sector = "";
+                                level = "";
+                                requirements = "";
+                                date-applied = "";
+                                stage = "";
+                                close-date = "";
+                                notes = "";
+                            } else {
+                                root.output = "Ensure all fields are entered...";
+                                root.show = true;
                             }
                         }
                     }
                 }
+
+                GroupBox {
+                    row: 0;
+                    col: 0;
+                    visible: root.choice == "Get Recorded Listings";
+
+                    Rectangle {
+                        padding: 5px;
+                        background: #333;
+                        min-height: 100px;
+                        Text {
+                            width: 100%;
+                            wrap: word-wrap;
+                            color: white;
+                            text: select-result;
+                        }
+                    }
+                }
+
+                HorizontalLayout {
+                    visible: root.choice == "Get Recorded Listings";
+                    row: 1;
+                    col: 0;
+                    alignment: space-around;
+                    Button {
+                        text: "Get";
+                        width: 200px;
+                        padding: 5px;
+                        max-height: 20px;
+                        clicked => {
+                            root.select-call();
+                        }
+                    }
+                }
+
+                UpdateForm {
+                    row: 0;
+                    col: 0;
+                    row-id <=> row-id;
+                    field <=> field;
+                    new-value <=> new-value;
+                    visible: root.choice == "Update Listings";
+                }
+
+                HorizontalLayout {
+                    row: 1;
+                    col: 0;
+                    visible: root.choice == "Update Listings";
+                    alignment: space-around;
+                    Button {
+                        text: "Update";
+                        width: 200px;
+                        padding: 5px;
+                        max-height: 20px;
+
+                        clicked => {
+                            if (field == "" || new-value == "" || row-id == "") {
+                                root.output = "Ensure all fields are entered...";
+                                root.show = true;
+                            } else {
+                                root.update-call({ field: field, new-value: new-value, row-id: row-id });
+                                field = "";
+                                new-value = "";
+                                row-id = "";
+                            }
+                        }
+                    }
+                }
+
+                HorizontalLayout {
+                    visible: root.choice == "Delete A Listing";
+                    row: 0;
+                    col: 0;
+
+                    spacing: 5px;
+
+                    delete-id := Input {
+                        text <=> root.delete-id;
+                        placeholder-text: "Enter the row ID you wish to delete";
+                    }
+
+                    Button {
+                        text: "Delete";
+                        width: 200px;
+                        padding: 10px;
+                        height: delete-id.height;
+
+                        clicked => {
+                            if (root.delete-id == "") {
+                                root.output = "Ensure all fields are entered...";
+                                root.show = true;
+                            } else {
+                                root.output = "Delete Pressed";
+                                root.show = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        VerticalLayout {
+            spacing: 0px;
+            Menu {
+                alignment: end;
+                padding-top: 0;
+                choice <=> choice;
             }
         }
     }
