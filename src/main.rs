@@ -62,8 +62,8 @@ fn main() -> Result<(), slint::PlatformError> {
                 sector.as_str(),
                 stage.as_str(),
             ) {
-                Ok(()) => {
-                    ui.set_output("Apprenticeship recorded successfully !".into());
+                Ok(msg) => {
+                    ui.set_output(msg.into());
                 }
                 Err(e) => {
                     let ret_str =
@@ -136,5 +136,29 @@ fn main() -> Result<(), slint::PlatformError> {
             }
         }
     });
+    ui.on_delete_call({
+        let ui_handle = ui.as_weak();
+        move |payload| {
+            let ui = ui_handle.unwrap();
+            let (id,) = payload;
+            let row_id: i32 = match id.parse() {
+                Ok(parsed) => parsed,
+                Err(e) => {
+                    println!("Error parsing the row id: {:?}", e);
+                    0
+                }
+            };
+            match DB.delete(&row_id) {
+                Ok(msg) => {
+                    ui.set_output(msg.into());
+                }
+                Err(e) => {
+                    let ret_str = format!("Error deleting job. Error: {:?}", e);
+                    ui.set_output(ret_str.into());
+                }
+            }
+        }
+    });
+
     ui.run()
 }

@@ -16,11 +16,11 @@ pub mod db_interactor {
             role: &str,
             sector: &str,
             stage: &str,
-        ) -> Result<(), Error>;
+        ) -> Result<String, Error>;
         fn select(&self) -> Result<Vec<Vec<String>>, Error>;
         // change string, () to (), string ?
         fn update(&self, field: &str, new_value: &str, row_id: &i32) -> Result<String, Error>;
-        //  fn delete(&self) -> Result<(),()>;
+        fn delete(&self, row_id: &i32) -> Result<String, Error>;
     }
     impl Interactions for DBInteractor {
         fn insert_appr(
@@ -36,7 +36,7 @@ pub mod db_interactor {
             role: &str,
             sector: &str,
             stage: &str,
-        ) -> Result<(), Error> {
+        ) -> Result<String, Error> {
             const USER_ID: i64 = 1;
             let connection = match sqlite::open(DB_PATH) {
                 Ok(conn) => conn,
@@ -64,7 +64,7 @@ pub mod db_interactor {
 
             // executes
             match insert_stmnt.next() {
-                Ok(_) => Ok(()),
+                Ok(_) => Ok("Job recorded !".to_string()),
                 Err(e) => Err(e),
             }
         }
@@ -147,6 +147,33 @@ pub mod db_interactor {
                     // No row found with the given ID? OR finished with iter thru rows
                     Ok("Information updated !".to_string())
                 }
+                Err(e) => Err(e),
+            };
+            row
+        }
+        fn delete(&self, row_id: &i32) -> Result<String, Error> {
+            let connection = match sqlite::open(DB_PATH) {
+                Ok(conn) => conn,
+                Err(e) => return Err(e),
+            };
+            let query = "DELETE FROM apprenticeship WHERE id = :row_id";
+
+            let mut delete_stmnt = match connection.prepare(&query) {
+                Ok(stmnt) => stmnt,
+                Err(e) => return Err(e),
+            };
+
+            // row_id dereffed to be converted to i64 to allow binding
+            let new_id: i64 = *row_id as i64;
+
+            delete_stmnt.bind((":row_id", new_id)).unwrap();
+
+            let row = match delete_stmnt.next() {
+                Ok(sqlite::State::Row) => {
+                    let notes = delete_stmnt.read::<String, _>("notes")?;
+                    Ok(notes)
+                }
+                Ok(sqlite::State::Done) => Ok("Deletion Successful.".to_string()),
                 Err(e) => Err(e),
             };
             row

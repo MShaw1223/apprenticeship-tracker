@@ -47,6 +47,9 @@ export component AppWindow inherits Window {
         new-value: string,
         row-id: string,
     });
+    callback delete-call({
+        row-id: string,
+    });
 
     title: "Apprenticeship Tracker";
     min-width: 800px;
@@ -210,7 +213,7 @@ export component AppWindow inherits Window {
                                 root.output = "Ensure all fields are entered...";
                                 root.show = true;
                             } else {
-                                root.output = "Delete Pressed";
+                                root.delete-call({ row-id: root.delete-id });
                                 root.show = true;
                             }
                         }
