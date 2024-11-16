@@ -1,0 +1,99 @@
+import { Button } from "std-widgets.slint";
+
+component Active inherits GridLayout {
+    in-out property <string> choice;
+
+    spacing: 10px;
+    padding-top: 2px;
+    padding: 10px;
+    padding-bottom: 0px;
+    Row {
+        Rectangle {
+            col: 0;
+            padding: 5px;
+            height: 4px;
+            background: grey;
+            width: 130px;
+            border-radius: 2px;
+            visible: root.choice == "Add Job Listing";
+        }
+
+        Rectangle {
+            col: 2;
+            padding: 5px;
+            height: 4px;
+            background: grey;
+            width: 130px;
+            border-radius: 2px;
+            visible: root.choice == "Get Recorded Listings";
+        }
+
+        Rectangle {
+            col: 4;
+            padding: 5px;
+            height: 4px;
+            background: grey;
+            width: 130px;
+            border-radius: 2px;
+            visible: root.choice == "Update Listings";
+        }
+
+        Rectangle {
+            col: 6;
+            padding: 5px;
+            height: 4px;
+            background: grey;
+            width: 130px;
+            border-radius: 2px;
+            visible: root.choice == "Delete A Listing";
+        }
+    }
+}
+
+export component Menu inherits VerticalLayout {
+    in-out property <string> choice;
+
+    alignment: center;
+    padding: 10px;
+    spacing: 0px;
+    VerticalLayout {
+        alignment: center;
+        GridLayout {
+            spacing-horizontal: 10px;
+            Row {
+
+                Button {
+                    text: "Add Job Listing";
+                    clicked => {
+                        root.choice = self.text;
+                    }
+                }
+
+                Button {
+                    text: "Get Recorded Listings";
+                    clicked => {
+                        root.choice = self.text;
+                    }
+                }
+
+                Button {
+                    text: "Update Listings";
+                    clicked => {
+                        root.choice = self.text;
+                    }
+                }
+
+                Button {
+                    text: "Delete A Listing";
+                    clicked => {
+                        root.choice = self.text;
+                    }
+                }
+            }
+        }
+
+        Active {
+            choice <=> choice;
+        }
+    }
+}

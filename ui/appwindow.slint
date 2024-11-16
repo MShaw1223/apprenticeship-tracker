@@ -1,9 +1,11 @@
-import { Button, GridBox, GroupBox } from "std-widgets.slint";
+import { Button, GridBox, GroupBox, ScrollView } from "std-widgets.slint";
 import { SubmitButton } from "./components/submitButton.slint";
 import { OutputModal, Output } from "./components/outputmodal.slint";
 import { OkButton } from "./components/okbutton.slint";
 import { EntryForm } from "./components/entryform.slint";
 import { UpdateForm } from "components/updateform.slint";
+import { Input } from "components/input.slint";
+import { Menu } from "components/menu.slint";
 
 export component AppWindow inherits Window {
     in-out property <string> company;
@@ -22,6 +24,8 @@ export component AppWindow inherits Window {
     in-out property <string> field;
     in-out property <string> new-value;
     in-out property <string> row-id;
+    in-out property <string> delete-id;
+    in-out property <string> choice: "Add Job Listing";
     in property <string> select-result: "";
 
     callback send-entry({
@@ -49,18 +53,27 @@ export component AppWindow inherits Window {
     min-height: 550px;
 
     VerticalLayout {
-        alignment: center;
         spacing: 0px;
+        Menu {
+            alignment: start;
+            padding-top: 0;
+            choice <=> choice;
+        }
 
-        HorizontalLayout {
+        VerticalLayout {
             alignment: center;
-
-            GridLayout {
-                padding: 50px;
-                spacing: 15px;
-
-                Row {
+            spacing: 0px;
+            HorizontalLayout {
+                alignment: center;
+                GridLayout {
+                    padding: 20px;
+                    spacing: 10px;
                     EntryForm {
+                        row: 0;
+                        col: 0;
+                        visible: root.choice == "Add Job Listing";
+
+                        min-height: 200px;
                         company <=> company;
                         role <=> role;
                         pay <=> pay;
@@ -73,10 +86,11 @@ export component AppWindow inherits Window {
                         close-date <=> close-date;
                         notes <=> notes;
                     }
-                }
 
-                Row {
                     HorizontalLayout {
+                        row: 1;
+                        col: 0;
+                        visible: root.choice == "Add Job Listing";
                         alignment: space-around;
                         SubmitButton {
                             clicked => {
@@ -114,23 +128,59 @@ export component AppWindow inherits Window {
                             }
                         }
                     }
-                }
 
-                Row {
+                    GroupBox {
+                        row: 0;
+                        col: 0;
+                        visible: root.choice == "Get Recorded Listings";
+
+                        Rectangle {
+                            padding: 5px;
+                            background: #333;
+                            min-height: 100px;
+                            Text {
+                                width: 100%;
+                                wrap: word-wrap;
+                                color: white;
+                                text: select-result;
+                            }
+                        }
+                    }
+
+                    HorizontalLayout {
+                        visible: root.choice == "Get Recorded Listings";
+                        row: 1;
+                        col: 0;
+                        alignment: space-around;
+                        Button {
+                            text: "Get";
+                            width: 200px;
+                            padding: 5px;
+                            max-height: 20px;
+                            clicked => {
+                                root.select-call();
+                            }
+                        }
+                    }
+
                     UpdateForm {
+                        row: 0;
+                        col: 0;
                         row-id <=> row-id;
                         field <=> field;
                         new-value <=> new-value;
+                        visible: root.choice == "Update Listings";
                     }
-                }
 
-                Row {
                     HorizontalLayout {
+                        row: 1;
+                        col: 0;
+                        visible: root.choice == "Update Listings";
                         alignment: space-around;
                         Button {
                             text: "Update";
                             width: 200px;
-                            padding: 10px;
+                            padding: 5px;
                             max-height: 20px;
 
                             clicked => {
@@ -146,35 +196,33 @@ export component AppWindow inherits Window {
                             }
                         }
                     }
-                }
 
-                Row {
-                    GroupBox {
-                        Rectangle {
-                            width: 800px;
-                            padding: 10px;
-                            background: #333;
-                            min-height: 100px;
-                            Text {
-                                width: 100%;
-                                wrap: word-wrap;
-                                color: white;
-                                text: select-result;
-                            }
-                        }
-                    }
-                }
-
-                Row {
                     HorizontalLayout {
-                        alignment: space-around;
+                        visible: root.choice == "Delete A Listing";
+                        row: 0;
+                        col: 0;
+
+                        spacing: 5px;
+
+                        delete-id := Input {
+                            text <=> root.delete-id;
+                            placeholder-text: "Enter the row ID you wish to delete";
+                        }
+
                         Button {
-                            text: "Get";
+                            text: "Delete";
                             width: 200px;
                             padding: 10px;
-                            max-height: 20px;
+                            height: delete-id.height;
+
                             clicked => {
-                                root.select-call();
+                                if (root.delete-id == "") {
+                                    root.output = "Ensure all fields are entered...";
+                                    root.show = true;
+                                } else {
+                                    root.output = "Delete Pressed";
+                                    root.show = true;
+                                }
                             }
                         }
                     }
