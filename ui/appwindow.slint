@@ -214,6 +214,7 @@ export component AppWindow inherits Window {
                                 root.show = true;
                             } else {
                                 root.delete-call({ row-id: root.delete-id });
+                                root.delete-id = "";
                                 root.show = true;
                             }
                         }
