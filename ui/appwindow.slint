@@ -1,4 +1,4 @@
-import { Button, GridBox, GroupBox, ScrollView } from "std-widgets.slint";
+import { Button, GridBox, GroupBox, ScrollView, ComboBox } from "std-widgets.slint";
 import { SubmitButton } from "./components/submitButton.slint";
 import { OutputModal, Output } from "./components/outputmodal.slint";
 import { OkButton } from "./components/okbutton.slint";
@@ -231,6 +231,14 @@ export component AppWindow inherits Window {
                 choice <=> choice;
             }
         }
+    }
+
+    ComboBox {
+        y: 0px;
+        width: self.preferred-width + 150px;
+        height: self.preferred-height;
+        model: ["first", "second", "third"];
+        current-value: "first";
     }
 
     OutputModal {
