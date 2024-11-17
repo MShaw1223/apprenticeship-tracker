@@ -18,7 +18,6 @@ pub mod db_interactor {
             stage: &str,
         ) -> Result<String, Error>;
         fn select(&self) -> Result<Vec<Vec<String>>, Error>;
-        // change string, () to (), string ?
         fn update(&self, field: &str, new_value: &str, row_id: &i32) -> Result<String, Error>;
         fn delete(&self, row_id: &i32) -> Result<String, Error>;
     }
@@ -62,7 +61,6 @@ pub mod db_interactor {
             insert_stmnt.bind((":sector", sector)).unwrap();
             insert_stmnt.bind((":stage", stage)).unwrap();
 
-            // executes
             match insert_stmnt.next() {
                 Ok(_) => Ok("Job recorded !".to_string()),
                 Err(e) => Err(e),
