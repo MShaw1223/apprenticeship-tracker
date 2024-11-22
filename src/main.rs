@@ -13,7 +13,7 @@ fn main() -> Result<(), slint::PlatformError> {
     let ui = AppWindow::new()?;
     const DB: DBInteractor = DBInteractor;
 
-    ui.on_send_entry({
+    ui.on_insert_job_call({
         let ui_handle = ui.as_weak();
 
         move |payload| {

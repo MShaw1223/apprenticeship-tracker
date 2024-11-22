@@ -1,4 +1,4 @@
-import { Button, GridBox, GroupBox, ScrollView, ComboBox } from "std-widgets.slint";
+import { Button, GridBox, GroupBox, ScrollView } from "std-widgets.slint";
 import { SubmitButton } from "./components/submitButton.slint";
 import { OutputModal, Output } from "./components/outputmodal.slint";
 import { OkButton } from "./components/okbutton.slint";
@@ -13,7 +13,7 @@ export component AppWindow inherits Window {
     in-out property <string> pay;
     in-out property <string> area;
     in-out property <string> sector;
-    in-out property <string> level;
+    in-out property <string> level: "Level";
     in-out property <string> requirements;
     in-out property <string> date-applied;
     in-out property <string> stage;
@@ -25,10 +25,10 @@ export component AppWindow inherits Window {
     in-out property <string> new-value;
     in-out property <string> row-id;
     in-out property <string> delete-id;
-    in-out property <string> choice: "Add Job Listing";
+    in-out property <string> choice: "Add Listing";
     in property <string> select-result: "";
 
-    callback send-entry({
+    callback insert-job-call({
         company: string,
         role: string,
         pay: string,
@@ -64,7 +64,7 @@ export component AppWindow inherits Window {
                 EntryForm {
                     row: 0;
                     col: 0;
-                    visible: root.choice == "Add Job Listing";
+                    visible: root.choice == "Add Listing";
 
                     min-height: 200px;
                     company <=> company;
@@ -83,14 +83,14 @@ export component AppWindow inherits Window {
                 HorizontalLayout {
                     row: 1;
                     col: 0;
-                    visible: root.choice == "Add Job Listing";
+                    visible: root.choice == "Add Listing";
                     alignment: space-around;
                     SubmitButton {
                         clicked => {
-                            if (company != "" && role != "" && pay != "" && area != "" && sector != "" && level != "" && requirements != "" && date-applied != "" && stage != "" && close-date != "" && notes != "") {
+                            if (company != "" && role != "" && pay != "" && area != "" && sector != "" && level != "" && level != "Level" && requirements != "" && date-applied != "" && stage != "" && close-date != "" && notes != "") {
                                 root.output = "Sending Entry";
                                 root.show = true;
-                                root.send-entry({
+                                root.insert-job-call({
                                     company: company,
                                     role: role,
                                     pay: pay,
@@ -108,7 +108,7 @@ export component AppWindow inherits Window {
                                 pay = "";
                                 area = "";
                                 sector = "";
-                                level = "";
+                                level = "Level";
                                 requirements = "";
                                 date-applied = "";
                                 stage = "";
@@ -125,7 +125,7 @@ export component AppWindow inherits Window {
                 GroupBox {
                     row: 0;
                     col: 0;
-                    visible: root.choice == "Get Recorded Listings";
+                    visible: root.choice == "View Listings";
 
                     Rectangle {
                         padding: 5px;
@@ -141,7 +141,7 @@ export component AppWindow inherits Window {
                 }
 
                 HorizontalLayout {
-                    visible: root.choice == "Get Recorded Listings";
+                    visible: root.choice == "View Listings";
                     row: 1;
                     col: 0;
                     alignment: space-around;
@@ -191,12 +191,13 @@ export component AppWindow inherits Window {
                 }
 
                 HorizontalLayout {
-                    visible: root.choice == "Delete A Listing";
+                    visible: root.choice == "Delete Listing";
                     row: 0;
                     col: 0;
 
                     spacing: 5px;
 
+                    // Combobox for fetched IDs, use company / role names ??
                     delete-id := Input {
                         text <=> root.delete-id;
                         placeholder-text: "Enter the row ID you wish to delete";
@@ -231,14 +232,6 @@ export component AppWindow inherits Window {
                 choice <=> choice;
             }
         }
-    }
-
-    ComboBox {
-        y: 0px;
-        width: self.preferred-width + 150px;
-        height: self.preferred-height;
-        model: ["first", "second", "third"];
-        current-value: "first";
     }
 
     OutputModal {

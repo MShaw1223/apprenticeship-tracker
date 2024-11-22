@@ -1,77 +1,82 @@
-import { GridBox } from "std-widgets.slint";
+import { GridBox, ComboBox } from "std-widgets.slint";
 import { Input } from "input.slint";
 import { TextArea } from "textArea.slint";
 
-export component EntryForm inherits GridBox {
-    // - section - //
-        spacing: 3px;
 
-        in-out property <string> company;
-        in-out property <string> role;
-        in-out property <string> pay;
-        in-out property <string> area;
-        in-out property <string> sector;
-        in-out property <string> level;
-        in-out property <string> requirements;
-        in-out property <string> date_applied;
-        in-out property <string> stage;
-        in-out property <string> close_date;
-        in-out property <string> notes;
-    // - section - //
-            Row {
-                company := Input {
-                    placeholder-text: "Company";
-                    text <=> root.company; // two way binding
-                }
-                role := Input {
-                    placeholder-text: "Role";
-                    text <=> root.role;
-                }
-                pay := Input {
-                    placeholder-text: "Pay";
-                    text <=> root.pay;
-                }
-                area := Input {
-                    placeholder-text: "area";
-                    text <=> root.area;
-                }
-                sector := Input {
-                    placeholder-text: "Sector";
-                    text <=> root.sector;
-                }
-            }
-    // - section - //
-            Row {
-                level := Input {
-                    placeholder-text: "from 4 - 7";
-                    text <=> root.level;
-                }
-                requirements := Input {
-                    placeholder-text: "Required Grades";
-                    text <=> root.requirements;
-                }
-                // change to a datetime?
-                date_applied := Input {
-                    placeholder-text: "Date Applied";
-                    text <=> root.date_applied;
-                }
-                // change to a dropdown?
-                stage := Input {
-                    placeholder-text: "Stage";
-                    text <=> root.stage;
-                }
-                // change to a datetime?
-                close_date := Input {
-                    placeholder-text: "Close Date";
-                    text <=> root.close_date;
-                }
-            }
-    // - section - //
-        Row {
-            notes := TextArea {
-                colspan: 5;
-                placeholder-text: "Notes";
-                text <=> root.notes;
-            }
+export component EntryForm inherits GridBox {
+    spacing: 10px;
+
+    in-out property <string> company;
+    in-out property <string> role;
+    in-out property <string> pay;
+    in-out property <string> area;
+    in-out property <string> sector;
+    in-out property <string> level;
+    in-out property <string> requirements;
+    in-out property <string> date_applied;
+    in-out property <string> stage;
+    in-out property <string> close_date;
+    in-out property <string> notes;
+
+    Row {
+        company := Input {
+            placeholder-text: "Company";
+            text <=> root.company;
         }
+
+        role := Input {
+            placeholder-text: "Role";
+            text <=> root.role;
+        }
+
+        pay := Input {
+            placeholder-text: "Pay";
+            text <=> root.pay;
+        }
+
+        area := Input {
+            placeholder-text: "area";
+            text <=> root.area;
+        }
+
+        sector := Input {
+            placeholder-text: "Sector";
+            text <=> root.sector;
+        }
+    }
+
+    Row {
+        level := ComboBox {
+            model: [0, 4, 5, 6, 7];
+            current-value <=> root.level;
+        }
+
+        requirements := Input {
+            placeholder-text: "Required Grades";
+            text <=> root.requirements;
+        }
+        // change to a datetime?
+        date_applied := Input {
+            placeholder-text: "Date Applied";
+            text <=> root.date_applied;
+        }
+       // change to a dropdown?
+        stage := Input {
+            placeholder-text: "Stage";
+            text <=> root.stage;
+        }
+        // change to a datetime?
+        close_date := Input {
+            placeholder-text: "Close Date";
+            text <=> root.close_date;
+        }
+    }
+
+    Row {
+        notes := TextArea {
+            colspan: 5;
+            placeholder-text: "Notes";
+            text <=> root.notes;
+        }
+    }
 }
