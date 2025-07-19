@@ -1,5 +1,6 @@
-import { GridBox } from "std-widgets.slint";
+import { GridBox, ComboBox } from "std-widgets.slint";
 import { Input } from "input.slint";
+
 export component UpdateForm inherits GridBox {
     in-out property <string> row-id;
     in-out property <string> field;
@@ -13,14 +14,54 @@ export component UpdateForm inherits GridBox {
             text <=> root.row-id;
         }
 
-        field := Input {
-            placeholder-text: "Field to change";
-            text <=> root.field;
+        field := ComboBox {
+            model: [
+                "Company",
+                "Role",
+                "Pay",
+                "Area",
+                "Sector",
+                "Level",
+                "Grades",
+                "Date Applied",
+                "Stage",
+                "Close Date"
+            ];
+            current-value <=> root.field;
         }
 
-        new-value := Input {
+        new-value-level := ComboBox {
+            model: [0, 4, 5, 6, 7];
+            current-value <=> root.new-value;
+            visible: root.field == "Level";
+        }
+
+        new-value-stage := ComboBox {
+            model: [
+                "Offer Received",
+                "Final Interviews",
+                "Assessment Centre",
+                "Online Interviews",
+                "Online Assessments",
+                "Applied",
+                "Interest Registered",
+                "No Action",
+                "Not Applying",
+                "Rejected: Offer Received",
+                "Rejected: Final Interviews",
+                "Rejected: Assessment Centre",
+                "Rejected: Online Interviews",
+                "Rejected: Online Assessments",
+                "Rejected: Applied"
+            ];
+            current-value <=> root.new-value;
+            visible: root.field == "Stage";
+        }
+
+        new-value-input := Input {
             placeholder-text: "New Value";
             text <=> root.new-value;
+            visible: root.field != "Level" && root.field != "Stage";
         }
     }
 }

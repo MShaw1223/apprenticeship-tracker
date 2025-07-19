@@ -35,7 +35,7 @@ export component EntryForm inherits GridBox {
         }
 
         area := Input {
-            placeholder-text: "area";
+            placeholder-text: "Area";
             text <=> root.area;
         }
 
@@ -61,9 +61,25 @@ export component EntryForm inherits GridBox {
             text <=> root.date_applied;
         }
        // change to a dropdown?
-        stage := Input {
-            placeholder-text: "Stage";
-            text <=> root.stage;
+        stage := ComboBox {
+            model: [
+                "Offer Recieved",
+                "Final Interviews",
+                "Assessment Centre",
+                "Online Interviews",
+                "Online Assessments",
+                "Applied",
+                "Interest Registered",
+                "No Action",
+                "Not Applying",
+                "Rejected: Offer Recieved",
+                "Rejected: Final Interviews",
+                "Rejected: Assessment Centre",
+                "Rejected: Online Interviews",
+                "Rejected: Online Assessments",
+                "Rejected: Applied",
+            ];
+            current-value <=> root.stage;
         }
         // change to a datetime?
         close_date := Input {
