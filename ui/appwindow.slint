@@ -6,13 +6,14 @@ import { EntryForm } from "./components/entryform.slint";
 import { UpdateForm } from "components/updateform.slint";
 import { Input } from "components/input.slint";
 import { Menu } from "components/menu.slint";
+import { Table } from "components/table.slint";
+import { GetPositionsType } from "helpful/structs.slint";
 
 export component AppWindow inherits Window {
     in-out property <string> company;
     in-out property <string> role;
     in-out property <string> pay;
     in-out property <string> area;
-    in-out property <string> sector;
     in-out property <string> level: "Level";
     in-out property <string> requirements;
     in-out property <string> date-applied;
@@ -26,14 +27,13 @@ export component AppWindow inherits Window {
     in-out property <string> row-id;
     in-out property <string> delete-id;
     in-out property <string> choice: "Add Listing";
-    in property <string> select-result: "";
+    in property <[[StandardListViewItem]]> select-result;
 
     callback insert-job-call({
         company: string,
         role: string,
         pay: string,
         area: string,
-        sector: string,
         level: string,
         requirements: string,
         date-applied: string,
@@ -52,15 +52,17 @@ export component AppWindow inherits Window {
     });
 
     title: "Apprenticeship Tracker";
-    min-width: 800px;
-    min-height: 550px;
+    min-width: 1300px;
+    min-height: 600px;
 
     VerticalLayout {
         HorizontalLayout {
             alignment: center;
             GridLayout {
-                padding: 20px;
-                spacing: 10px;
+                // padding: 20px;
+                // spacing: 10px;
+                padding-top: 50px;
+                width: 100%;
                 EntryForm {
                     row: 0;
                     col: 0;
@@ -71,7 +73,6 @@ export component AppWindow inherits Window {
                     role <=> role;
                     pay <=> pay;
                     area <=> area;
-                    sector <=> sector;
                     level <=> level;
                     requirements <=> requirements;
                     date-applied <=> date-applied;
@@ -87,7 +88,7 @@ export component AppWindow inherits Window {
                     alignment: space-around;
                     SubmitButton {
                         clicked => {
-                            if (company != "" && role != "" && pay != "" && area != "" && sector != "" && level != "" && level != "Level" && requirements != "" && date-applied != "" && stage != "" && close-date != "" && notes != "") {
+                            if (company != "" && role != "" && pay != "" && area != "" && level != "" && level != "Level" && requirements != "" && date-applied != "" && stage != "" && close-date != "" && notes != "") {
                                 root.output = "Sending Entry";
                                 root.show = true;
                                 root.insert-job-call({
@@ -95,7 +96,6 @@ export component AppWindow inherits Window {
                                     role: role,
                                     pay: pay,
                                     area: area,
-                                    sector: sector,
                                     level: level,
                                     requirements: requirements,
                                     date-applied: date-applied,
@@ -107,7 +107,6 @@ export component AppWindow inherits Window {
                                 role = "";
                                 pay = "";
                                 area = "";
-                                sector = "";
                                 level = "Level";
                                 requirements = "";
                                 date-applied = "";
@@ -122,22 +121,17 @@ export component AppWindow inherits Window {
                     }
                 }
 
-                GroupBox {
+                // GroupBox {
+                //     row: 0;
+                //     col: 0;
+                //     width: 100%;
+
+                // }
+                Table {
                     row: 0;
                     col: 0;
                     visible: root.choice == "View Listings";
-
-                    Rectangle {
-                        padding: 5px;
-                        background: #333;
-                        min-height: 100px;
-                        Text {
-                            width: 100%;
-                            wrap: word-wrap;
-                            color: white;
-                            text: select-result;
-                        }
-                    }
+                    rows: select-result;
                 }
 
                 HorizontalLayout {
@@ -225,6 +219,7 @@ export component AppWindow inherits Window {
         }
 
         VerticalLayout {
+            padding-bottom: 50px;
             spacing: 0px;
             Menu {
                 alignment: end;

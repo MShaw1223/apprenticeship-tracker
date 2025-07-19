@@ -16,7 +16,6 @@
             pay REAL NOT NULL,
             requirements TEXT,
             role VARCHAR(100) NOT NULL,
-            sector VARCHAR(100) NOT NULL,
             stage VARCHAR(50) NOT NULL,
             FOREIGN KEY (user_id) REFERENCES user(id)
         )";

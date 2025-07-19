@@ -10,7 +10,6 @@ export component EntryForm inherits GridBox {
     in-out property <string> role;
     in-out property <string> pay;
     in-out property <string> area;
-    in-out property <string> sector;
     in-out property <string> level;
     in-out property <string> requirements;
     in-out property <string> date_applied;
@@ -37,11 +36,6 @@ export component EntryForm inherits GridBox {
         area := Input {
             placeholder-text: "Area";
             text <=> root.area;
-        }
-
-        sector := Input {
-            placeholder-text: "Sector";
-            text <=> root.sector;
         }
     }
 

@@ -15,17 +15,8 @@ export component UpdateForm inherits GridBox {
         }
 
         field := ComboBox {
-            model: [
-                "Company",
-                "Role",
-                "Pay",
-                "Area",
-                "Sector",
-                "Level",
-                "Grades",
-                "Date Applied",
-                "Stage",
-                "Close Date"
+            model: ["Company", "Role", "Pay", "Area", "Level", "Grades", "Date Applied", "Stage",
+                // "Close Date"
             ];
             current-value <=> root.field;
         }

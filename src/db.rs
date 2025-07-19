@@ -1,5 +1,11 @@
+slint::include_modules!();
+
 pub mod db_interactor {
+    use std::vec;
+
+    use slint::{ModelRc, StandardListViewItem, VecModel};
     use sqlite::{Error, State};
+
     const DB_PATH: &str = "/Users/miller/Coding/projects/apprenticeship-tracker/tracker.db";
     pub struct DBInteractor;
     pub trait Interactions {
@@ -14,10 +20,9 @@ pub mod db_interactor {
             pay: f64,
             requirements: &str,
             role: &str,
-            sector: &str,
             stage: &str,
         ) -> Result<String, Error>;
-        fn select(&self) -> Result<Vec<Vec<String>>, Error>;
+        fn select(&self) -> Result<ModelRc<ModelRc<StandardListViewItem>>, Error>;
         fn update(&self, field: &str, new_value: &str, row_id: &i32) -> Result<String, Error>;
         fn delete(&self, row_id: &i32) -> Result<String, Error>;
     }
@@ -33,7 +38,6 @@ pub mod db_interactor {
             pay: f64,
             requirements: &str,
             role: &str,
-            sector: &str,
             stage: &str,
         ) -> Result<String, Error> {
             const USER_ID: i64 = 1;
@@ -42,7 +46,7 @@ pub mod db_interactor {
                 Err(e) => return Err(e),
             };
 
-            let query = "INSERT INTO apprenticeship (user_id, area, close_date, company, date_applied, level, notes, pay, requirements, role, sector, stage) VALUES (:user_id, :area, :close_date, :company, :date_applied, :level, :notes, :pay, :requirements, :role, :sector, :stage)";
+            let query = "INSERT INTO apprenticeship (user_id, area, close_date, company, date_applied, level, notes, pay, requirements, role, stage) VALUES (:user_id, :area, :close_date, :company, :date_applied, :level, :notes, :pay, :requirements, :role, :stage)";
             let mut insert_stmnt = match connection.prepare(query) {
                 Ok(stmnt) => stmnt,
                 Err(e) => return Err(e),
@@ -58,7 +62,6 @@ pub mod db_interactor {
             insert_stmnt.bind((":pay", pay)).unwrap();
             insert_stmnt.bind((":requirements", requirements)).unwrap();
             insert_stmnt.bind((":role", role)).unwrap();
-            insert_stmnt.bind((":sector", sector)).unwrap();
             insert_stmnt.bind((":stage", stage)).unwrap();
 
             match insert_stmnt.next() {
@@ -66,7 +69,7 @@ pub mod db_interactor {
                 Err(e) => Err(e),
             }
         }
-        fn select(&self) -> Result<Vec<Vec<String>>, Error> {
+        fn select(&self) -> Result<ModelRc<ModelRc<StandardListViewItem>>, Error> {
             const USER_ID: i64 = 1;
             let connection = sqlite::open(DB_PATH).unwrap();
 
@@ -79,39 +82,53 @@ pub mod db_interactor {
 
             let mut payload = Vec::new();
 
-            // IMPORTANT: this works for apprenticeship table only. If any new added in future logic will need adjusting.
             while let Ok(State::Row) = statement.next() {
-                let mut row = Vec::new();
-                row.push(statement.read::<String, _>("id").unwrap());
-
-                row.push(statement.read::<String, _>("user_id").unwrap());
-
-                row.push(statement.read::<String, _>("company").unwrap());
-
-                row.push(statement.read::<String, _>("role").unwrap());
-
-                row.push(statement.read::<String, _>("pay").unwrap());
-
-                row.push(statement.read::<String, _>("area").unwrap());
-
-                row.push(statement.read::<String, _>("sector").unwrap());
-
-                row.push(statement.read::<String, _>("level").unwrap());
-
-                row.push(statement.read::<String, _>("requirements").unwrap());
-
-                row.push(statement.read::<String, _>("date_applied").unwrap());
-
-                row.push(statement.read::<String, _>("stage").unwrap());
-
-                row.push(statement.read::<String, _>("close_date").unwrap());
-
-                row.push(statement.read::<String, _>("notes").unwrap());
-
-                payload.push(row);
+                payload.push(vec![
+                    StandardListViewItem::from(slint::SharedString::from(
+                        statement.read::<String, _>("id").unwrap(),
+                    )),
+                    // StandardListViewItem::from(slint::SharedString::from(
+                    //     statement.read::<String, _>("user_id").unwrap(),
+                    // )),
+                    StandardListViewItem::from(slint::SharedString::from(
+                        statement.read::<String, _>("company").unwrap(),
+                    )),
+                    StandardListViewItem::from(slint::SharedString::from(
+                        statement.read::<String, _>("role").unwrap(),
+                    )),
+                    StandardListViewItem::from(slint::SharedString::from(
+                        statement.read::<String, _>("pay").unwrap(),
+                    )),
+                    StandardListViewItem::from(slint::SharedString::from(
+                        statement.read::<String, _>("area").unwrap(),
+                    )),
+                    StandardListViewItem::from(slint::SharedString::from(
+                        statement.read::<String, _>("level").unwrap(),
+                    )),
+                    StandardListViewItem::from(slint::SharedString::from(
+                        statement.read::<String, _>("requirements").unwrap(),
+                    )),
+                    StandardListViewItem::from(slint::SharedString::from(
+                        statement.read::<String, _>("date_applied").unwrap(),
+                    )),
+                    StandardListViewItem::from(slint::SharedString::from(
+                        statement.read::<String, _>("stage").unwrap(),
+                    )),
+                    // StandardListViewItem::from(slint::SharedString::from(
+                    //     statement.read::<String, _>("close_date").unwrap(),
+                    // )),
+                    StandardListViewItem::from(slint::SharedString::from(
+                        statement.read::<String, _>("notes").unwrap(),
+                    )),
+                ]);
             }
-
-            Ok(payload)
+            let row_models: Vec<ModelRc<StandardListViewItem>> = payload
+                .into_iter()
+                .map(|row| ModelRc::new(VecModel::from(row)))
+                .collect();
+            let vec_model = VecModel::from(row_models);
+            let model_rc: ModelRc<ModelRc<StandardListViewItem>> = ModelRc::new(vec_model);
+            Ok(model_rc)
         }
         fn update(&self, field: &str, new_value: &str, row_id: &i32) -> Result<String, Error> {
             let connection = match sqlite::open(DB_PATH) {
@@ -119,7 +136,7 @@ pub mod db_interactor {
                 Err(e) => return Err(e),
             };
 
-            // update *table SET *col = *val WHERE *col = *old AND userid = ID
+            // update *table SET *col = *val WHERE *col = *old [AND userid = ID]**Assumed as users are not a feature
             let query = format!(
                 "UPDATE apprenticeship SET {:?} = {:?} WHERE id = :row_id",
                 field, new_value

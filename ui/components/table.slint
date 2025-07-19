@@ -1,0 +1,21 @@
+import {StandardTableView} from "std-widgets.slint";
+import {GetPositionsType} from "../helpful/structs.slint";
+
+export component Table inherits StandardTableView {
+    width: 100%;
+    height: 300px;
+
+    columns: [
+        { title: "ID", width: 50px },
+        { title: "Company", width: 100px },
+        { title: "Role", width: 200px },
+        { title: "Pay", width: 70px },
+        { title: "Area", width: 120px },
+        { title: "Level", width: 65px },
+        { title: "Requirements", width: 110px },
+        { title: "Date Applied", width: 105px },
+        { title: "Stage", width: 200px },
+        // { title: "Close Date" },
+        { title: "Notes" },
+    ];
+}
