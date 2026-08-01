@@ -1,9 +1,9 @@
 // Prevent console window in addition to Slint window in Windows release builds when, e.g., starting the app via file manager. Ignored on other platforms.
 
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-mod db;
+mod repository;
 
-use db::db_interactor::{DBInteractor, Interactions};
+use repository::role_db::{DBInteractor, Interactions};
 use slint::ComponentHandle;
 slint::include_modules!();
 

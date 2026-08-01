@@ -1,6 +1,6 @@
 slint::include_modules!();
 
-pub mod db_interactor {
+pub mod role_db {
     use std::vec;
 
     use slint::{ModelRc, StandardListViewItem, VecModel};
