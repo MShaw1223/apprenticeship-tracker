@@ -1,22 +1,23 @@
 // Prevent console window in addition to Slint window in Windows release builds when, e.g., starting the app via file manager. Ignored on other platforms.
 
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-mod repository;
+use std::rc::Rc;
 
-use repository::role_db::{DBInteractor, Interactions};
-use slint::ComponentHandle;
+use apprenticeship_tracker::repository::sqlite::SqliteRepository;
+use apprenticeship_tracker::services::ApprenticeshipService;
 slint::include_modules!();
 
 fn main() -> Result<(), slint::PlatformError> {
     let ui = AppWindow::new()?;
-    const DB: DBInteractor = DBInteractor;
+    let repository = SqliteRepository::new("tracker.db");
+    let service = Rc::new(ApprenticeshipService::new(repository));
 
     ui.on_insert_job_call({
         let ui_handle = ui.as_weak();
+        let service = service.clone();
 
         move |payload| {
             let ui = ui_handle.unwrap();
-            // Destructure payload (user input) tuple to vars
             let (
                 area,
                 close_date,
@@ -30,101 +31,115 @@ fn main() -> Result<(), slint::PlatformError> {
                 stage,
             ) = payload;
 
-            let level: i8 = match level_str.parse() {
-                Ok(parsed) => parsed,
-                Err(e) => {
-                    println!("Error parsing level: {:?}", e);
-                    // 0 as default
-                    0
-                }
-            };
-            let pay: f64 = match pay_str.parse() {
-                Ok(parsed) => parsed,
-                Err(e) => {
-                    println!("Error parsing pay: {:?}", e);
-                    0.0
-                }
-            };
-
-            match DB.insert_appr(
+            let result = service.create(
                 area.as_str(),
                 close_date.as_str(),
                 company.as_str(),
                 date_applied.as_str(),
-                level,
+                level_str.as_str(),
                 notes.as_str(),
-                pay,
+                pay_str.as_str(),
                 requirements.as_str(),
                 role.as_str(),
                 stage.as_str(),
-            ) {
-                Ok(msg) => {
-                    ui.set_output(msg.into());
-                }
-                Err(e) => {
-                    let ret_str =
-                        format!("Error recording apprenticeship details :(. Error: {:?}", e);
-                    ui.set_output(ret_str.into());
-                }
+            );
+
+            match result {
+                Ok(()) => ui.set_output("Job recorded !".into()),
+                Err(e) => ui.set_output(format!("Error recording apprenticeship details :(. Error: {:?}", e).into()),
             }
         }
-        // Date should be format: YYYY-MM-DD // is stored in format DD-MM-YYYY
     });
+
     ui.on_select_call({
         let ui_handle = ui.as_weak();
+        let service = service.clone();
+
         move || {
             let ui = ui_handle.unwrap();
-            match DB.select() {
+            match service.list() {
                 Ok(listings) => {
-                    ui.set_select_result(listings);
+                    let rows: slint::ModelRc<slint::ModelRc<slint::StandardListViewItem>> =
+                        slint::ModelRc::new(slint::VecModel::from(
+                            listings
+                                .into_iter()
+                                .map(|appr| {
+                                    let row = vec![
+                                        slint::StandardListViewItem::from(
+                                            slint::SharedString::from(appr.id.to_string()),
+                                        ),
+                                        slint::StandardListViewItem::from(
+                                            slint::SharedString::from(appr.company),
+                                        ),
+                                        slint::StandardListViewItem::from(
+                                            slint::SharedString::from(appr.role),
+                                        ),
+                                        slint::StandardListViewItem::from(
+                                            slint::SharedString::from(appr.pay.to_string()),
+                                        ),
+                                        slint::StandardListViewItem::from(
+                                            slint::SharedString::from(appr.area),
+                                        ),
+                                        slint::StandardListViewItem::from(
+                                            slint::SharedString::from(appr.level.to_string()),
+                                        ),
+                                        slint::StandardListViewItem::from(
+                                            slint::SharedString::from(appr.requirements),
+                                        ),
+                                        slint::StandardListViewItem::from(
+                                            slint::SharedString::from(appr.date_applied),
+                                        ),
+                                        slint::StandardListViewItem::from(
+                                            slint::SharedString::from(appr.stage),
+                                        ),
+                                        slint::StandardListViewItem::from(
+                                            slint::SharedString::from(appr.notes),
+                                        ),
+                                    ];
+                                    slint::ModelRc::new(slint::VecModel::from(row))
+                                })
+                                .collect::<Vec<_>>(),
+                        ));
+                    ui.set_select_result(rows);
                 }
                 Err(e) => {
-                    let ret_str = format!("Error fetching listings: {:?}", e);
-                    ui.set_output(ret_str.into());
+                    ui.set_output(format!("Error fetching listings: {:?}", e).into());
                     ui.set_show(true);
                 }
             }
         }
     });
+
     ui.on_update_call({
         let ui_handle = ui.as_weak();
+        let service = service.clone();
+
         move |update_payload| {
             let ui = ui_handle.unwrap();
             let (field, new_value, id) = update_payload;
-            let converted_id = id.parse::<i32>().unwrap();
-            match DB.update(&field, &new_value, &converted_id) {
-                Ok(msg) => {
-                    ui.set_output(msg.into());
+            match service.update_field(&field, &new_value, &id) {
+                Ok(()) => {
+                    ui.set_output("Information updated !".into());
                     ui.set_show(true);
                 }
                 Err(e) => {
-                    let ret_str = format!("Error updating information: {:?}", e);
-                    ui.set_output(ret_str.into());
+                    ui.set_output(format!("Error updating information: {:?}", e).into());
                     ui.set_show(true);
                 }
             }
         }
     });
+
     ui.on_delete_call({
         let ui_handle = ui.as_weak();
+        let service = service;
+
         move |payload| {
             let ui = ui_handle.unwrap();
             let (id,) = payload;
-            let row_id: i32 = match id.parse() {
-                Ok(parsed) => parsed,
-                Err(e) => {
-                    println!("Error parsing the row id: {:?}", e);
-                    0
-                }
-            };
-            match DB.delete(&row_id) {
-                Ok(msg) => {
-                    ui.set_output(msg.into());
-                }
-                Err(e) => {
-                    let ret_str = format!("Error deleting job. Error: {:?}", e);
-                    ui.set_output(ret_str.into());
-                }
+            match service.delete(&id) {
+                Ok(()) => ui.set_output("Deletion Successful.".into()),
+                Err(e) => ui.set_output(format!("Error deleting job. Error: {:?}", e).into()),
             }
         }
     });
