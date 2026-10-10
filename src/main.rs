@@ -1,148 +1,130 @@
 // Prevent console window in addition to Slint window in Windows release builds when, e.g., starting the app via file manager. Ignored on other platforms.
 
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+use std::error::Error;
 use std::rc::Rc;
 
-use apprenticeship_tracker::repository::sqlite::SqliteRepository;
-use apprenticeship_tracker::services::ApprenticeshipService;
+use apprenticeship_tracker::models::{Apprenticeship, ApprenticeshipInput};
+use apprenticeship_tracker::services::{apprenticeship, database::Database};
+use slint::{ModelRc, SharedString, StandardListViewItem, VecModel};
 slint::include_modules!();
 
-fn main() -> Result<(), slint::PlatformError> {
+const DB_PATH: &str = "tracker.db";
+
+// Column order must match the columns declared in ui/components/table.slint
+fn table_row(appr: Apprenticeship) -> ModelRc<StandardListViewItem> {
+    let cells = [
+        appr.id.to_string(),
+        appr.company,
+        appr.role,
+        appr.pay.to_string(),
+        appr.area,
+        appr.level.to_string(),
+        appr.requirements,
+        appr.date_applied,
+        appr.stage,
+        appr.notes,
+    ]
+    .map(|cell| StandardListViewItem::from(SharedString::from(cell)));
+
+    ModelRc::new(VecModel::from(cells.to_vec()))
+}
+
+fn show_output(ui: &AppWindow, message: String) {
+    ui.set_output(message.into());
+    ui.set_show(true);
+}
+
+fn main() -> Result<(), Box<dyn Error>> {
     let ui = AppWindow::new()?;
-    let repository = SqliteRepository::new("tracker.db");
-    let service = Rc::new(ApprenticeshipService::new(repository));
+    let db = Rc::new(Database::open(DB_PATH)?);
 
     ui.on_insert_job_call({
         let ui_handle = ui.as_weak();
-        let service = service.clone();
+        let db = db.clone();
 
         move |payload| {
             let ui = ui_handle.unwrap();
+            // Slint passes the payload as a tuple ordered alphabetically by field name
             let (
                 area,
                 close_date,
                 company,
                 date_applied,
-                level_str,
+                level,
                 notes,
-                pay_str,
+                pay,
                 requirements,
                 role,
                 stage,
             ) = payload;
 
-            let result = service.create(
-                area.as_str(),
-                close_date.as_str(),
-                company.as_str(),
-                date_applied.as_str(),
-                level_str.as_str(),
-                notes.as_str(),
-                pay_str.as_str(),
-                requirements.as_str(),
-                role.as_str(),
-                stage.as_str(),
-            );
+            let input = ApprenticeshipInput {
+                area: area.into(),
+                close_date: close_date.into(),
+                company: company.into(),
+                date_applied: date_applied.into(),
+                level: level.into(),
+                notes: notes.into(),
+                pay: pay.into(),
+                requirements: requirements.into(),
+                role: role.into(),
+                stage: stage.into(),
+            };
 
-            match result {
-                Ok(()) => ui.set_output("Job recorded !".into()),
-                Err(e) => ui.set_output(format!("Error recording apprenticeship details :(. Error: {:?}", e).into()),
+            match apprenticeship::create(&db, input) {
+                Ok(()) => show_output(&ui, "Job recorded !".to_string()),
+                Err(e) => show_output(
+                    &ui,
+                    format!("Error recording apprenticeship details :(. Error: {}", e),
+                ),
             }
         }
     });
 
     ui.on_select_call({
         let ui_handle = ui.as_weak();
-        let service = service.clone();
+        let db = db.clone();
 
         move || {
             let ui = ui_handle.unwrap();
-            match service.list() {
+            match apprenticeship::list(&db) {
                 Ok(listings) => {
-                    let rows: slint::ModelRc<slint::ModelRc<slint::StandardListViewItem>> =
-                        slint::ModelRc::new(slint::VecModel::from(
-                            listings
-                                .into_iter()
-                                .map(|appr| {
-                                    let row = vec![
-                                        slint::StandardListViewItem::from(
-                                            slint::SharedString::from(appr.id.to_string()),
-                                        ),
-                                        slint::StandardListViewItem::from(
-                                            slint::SharedString::from(appr.company),
-                                        ),
-                                        slint::StandardListViewItem::from(
-                                            slint::SharedString::from(appr.role),
-                                        ),
-                                        slint::StandardListViewItem::from(
-                                            slint::SharedString::from(appr.pay.to_string()),
-                                        ),
-                                        slint::StandardListViewItem::from(
-                                            slint::SharedString::from(appr.area),
-                                        ),
-                                        slint::StandardListViewItem::from(
-                                            slint::SharedString::from(appr.level.to_string()),
-                                        ),
-                                        slint::StandardListViewItem::from(
-                                            slint::SharedString::from(appr.requirements),
-                                        ),
-                                        slint::StandardListViewItem::from(
-                                            slint::SharedString::from(appr.date_applied),
-                                        ),
-                                        slint::StandardListViewItem::from(
-                                            slint::SharedString::from(appr.stage),
-                                        ),
-                                        slint::StandardListViewItem::from(
-                                            slint::SharedString::from(appr.notes),
-                                        ),
-                                    ];
-                                    slint::ModelRc::new(slint::VecModel::from(row))
-                                })
-                                .collect::<Vec<_>>(),
-                        ));
-                    ui.set_select_result(rows);
+                    let rows: Vec<_> = listings.into_iter().map(table_row).collect();
+                    ui.set_select_result(ModelRc::new(VecModel::from(rows)));
                 }
-                Err(e) => {
-                    ui.set_output(format!("Error fetching listings: {:?}", e).into());
-                    ui.set_show(true);
-                }
+                Err(e) => show_output(&ui, format!("Error fetching listings: {}", e)),
             }
         }
     });
 
     ui.on_update_call({
         let ui_handle = ui.as_weak();
-        let service = service.clone();
+        let db = db.clone();
 
-        move |update_payload| {
+        move |payload| {
             let ui = ui_handle.unwrap();
-            let (field, new_value, id) = update_payload;
-            match service.update_field(&field, &new_value, &id) {
-                Ok(()) => {
-                    ui.set_output("Information updated !".into());
-                    ui.set_show(true);
-                }
-                Err(e) => {
-                    ui.set_output(format!("Error updating information: {:?}", e).into());
-                    ui.set_show(true);
-                }
+            let (field, new_value, row_id) = payload;
+            match apprenticeship::update_field(&db, &field, &new_value, &row_id) {
+                Ok(()) => show_output(&ui, "Information updated !".to_string()),
+                Err(e) => show_output(&ui, format!("Error updating information: {}", e)),
             }
         }
     });
 
     ui.on_delete_call({
         let ui_handle = ui.as_weak();
-        let service = service;
 
         move |payload| {
             let ui = ui_handle.unwrap();
-            let (id,) = payload;
-            match service.delete(&id) {
-                Ok(()) => ui.set_output("Deletion Successful.".into()),
-                Err(e) => ui.set_output(format!("Error deleting job. Error: {:?}", e).into()),
+            let (row_id,) = payload;
+            match apprenticeship::delete(&db, &row_id) {
+                Ok(()) => show_output(&ui, "Deletion Successful.".to_string()),
+                Err(e) => show_output(&ui, format!("Error deleting job. Error: {}", e)),
             }
         }
     });
 
-    ui.run()
+    ui.run()?;
+    Ok(())
 }

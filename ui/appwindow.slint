@@ -1,13 +1,12 @@
-import { Button, GridBox, GroupBox, ScrollView } from "std-widgets.slint";
-import { SubmitButton } from "./components/submitButton.slint";
-import { OutputModal, Output } from "./components/outputmodal.slint";
-import { OkButton } from "./components/okbutton.slint";
-import { EntryForm } from "./components/entryform.slint";
+import { Button } from "std-widgets.slint";
+import { SubmitButton } from "components/submitbutton.slint";
+import { OutputModal, Output } from "components/outputmodal.slint";
+import { OkButton } from "components/okbutton.slint";
+import { EntryForm } from "components/entryform.slint";
 import { UpdateForm } from "components/updateform.slint";
 import { Input } from "components/input.slint";
 import { Menu } from "components/menu.slint";
 import { Table } from "components/table.slint";
-import { GetPositionsType } from "helpful/structs.slint";
 
 export component AppWindow inherits Window {
     in-out property <string> company;
@@ -59,8 +58,6 @@ export component AppWindow inherits Window {
         HorizontalLayout {
             alignment: center;
             GridLayout {
-                // padding: 20px;
-                // spacing: 10px;
                 padding-top: 50px;
                 width: 100%;
                 EntryForm {
@@ -121,12 +118,6 @@ export component AppWindow inherits Window {
                     }
                 }
 
-                // GroupBox {
-                //     row: 0;
-                //     col: 0;
-                //     width: 100%;
-
-                // }
                 Table {
                     row: 0;
                     col: 0;

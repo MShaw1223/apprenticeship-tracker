@@ -1,7 +1,6 @@
 import { GridBox, ComboBox } from "std-widgets.slint";
 import { Input } from "input.slint";
-import { TextArea } from "textArea.slint";
-
+import { TextArea } from "textarea.slint";
 
 export component EntryForm inherits GridBox {
     spacing: 10px;
@@ -57,7 +56,7 @@ export component EntryForm inherits GridBox {
        // change to a dropdown?
         stage := ComboBox {
             model: [
-                "Offer Recieved",
+                "Offer Received",
                 "Final Interviews",
                 "Assessment Centre",
                 "Online Interviews",
@@ -66,7 +65,7 @@ export component EntryForm inherits GridBox {
                 "Interest Registered",
                 "No Action",
                 "Not Applying",
-                "Rejected: Offer Recieved",
+                "Rejected: Offer Received",
                 "Rejected: Final Interviews",
                 "Rejected: Assessment Centre",
                 "Rejected: Online Interviews",

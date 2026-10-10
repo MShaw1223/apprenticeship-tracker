@@ -1,40 +1,37 @@
-# Slint Rust Template
+# Apprenticeship Tracker
 
-A template for a Rust application that's using [Slint](https://slint.rs/) for the user interface.
+A desktop app for keeping track of apprenticeship applications, built with Rust,
+[Slint](https://slint.rs/) for the user interface and SQLite for storage.
 
-## About
-
-This template helps you get started developing a Rust application with Slint as toolkit
-for the user interface. It demonstrates the integration between the `.slint` UI markup and
-Rust code, how to react to callbacks, get and set properties, and use basic widgets.
+Listings can be added, viewed, updated and deleted. Each one records the company, role,
+pay, area, level, required grades, date applied, stage, close date and notes.
 
 ## Usage
 
-1. Install Rust by following its [getting-started guide](https://www.rust-lang.org/learn/get-started).
-   Once this is done, you should have the `rustc` compiler and the `cargo` build system installed in your `PATH`.
-2. Install [`cargo-generate`](https://github.com/cargo-generate/cargo-generate):
-    ```
-    cargo install cargo-generate
-    ```
-3. Set up a sample project with this template:
-    ```
-    cargo generate --git https://github.com/slint-ui/slint-rust-template --name my-project
-    cd my-project
-    ```
-3. Build with `cargo`:
-    ```
-    cargo build
-    ```
-4. Run the application binary:
-    ```
-    cargo run
-    ```
+Install Rust by following its [getting-started guide](https://www.rust-lang.org/learn/get-started), then:
 
-We recommend using an IDE for development, along with our [LSP-based IDE integration for `.slint` files](https://github.com/slint-ui/slint/blob/master/tools/lsp/README.md). You can also load this project directly in [Visual Studio Code](https://code.visualstudio.com) and install our [Slint extension](https://marketplace.visualstudio.com/items?itemName=Slint.slint).
+```
+cargo run
+```
 
-## Next Steps
+Listings are stored in `tracker.db` in the directory the app is run from. The file and
+its tables are created on first run.
 
-We hope that this template helps you get started, and that you enjoy exploring making user interfaces with Slint. To learn more
-about the Slint APIs and the `.slint` markup language, check out our [online documentation](https://slint.dev/docs).
+```
+cargo test
+```
 
-Don't forget to edit this readme to replace it by yours.
+## Layout
+
+```
+src/
+  main.rs       connects the Slint callbacks to the services
+  lib.rs
+  models/       data types: Apprenticeship, ApprenticeshipInput, Field, AppError
+  services/
+    apprenticeship.rs   validating and recording listings
+    database.rs         SQLite storage
+ui/
+  appwindow.slint       the main window
+  components/           forms, table, menu and buttons
+```
