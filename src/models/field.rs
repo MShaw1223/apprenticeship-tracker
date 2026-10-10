@@ -47,3 +47,52 @@ impl Field {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const ALL: [Field; 10] = [
+        Field::Area,
+        Field::CloseDate,
+        Field::Company,
+        Field::DateApplied,
+        Field::Level,
+        Field::Notes,
+        Field::Pay,
+        Field::Requirements,
+        Field::Role,
+        Field::Stage,
+    ];
+
+    #[test]
+    fn from_label_accepts_column_names() {
+        for field in ALL {
+            assert_eq!(Field::from_label(field.column()), Some(field));
+        }
+    }
+
+    #[test]
+    fn from_label_accepts_form_labels() {
+        assert_eq!(Field::from_label("Date Applied"), Some(Field::DateApplied));
+        assert_eq!(Field::from_label("Close Date"), Some(Field::CloseDate));
+        assert_eq!(Field::from_label("Grades"), Some(Field::Requirements));
+    }
+
+    #[test]
+    fn from_label_ignores_case_and_surrounding_whitespace() {
+        assert_eq!(Field::from_label("  COMPANY "), Some(Field::Company));
+        assert_eq!(Field::from_label("sTaGe"), Some(Field::Stage));
+    }
+
+    #[test]
+    fn from_label_rejects_unknown_labels() {
+        assert_eq!(Field::from_label("id"), None);
+        assert_eq!(Field::from_label("user_id"), None);
+        assert_eq!(Field::from_label(""), None);
+        assert_eq!(
+            Field::from_label("company; DROP TABLE apprenticeship"),
+            None
+        );
+    }
+}
