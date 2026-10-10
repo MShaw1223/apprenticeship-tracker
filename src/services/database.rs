@@ -109,3 +109,104 @@ impl Database {
         Ok(self.connection.change_count())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn apprenticeship() -> Apprenticeship {
+        Apprenticeship {
+            id: 0,
+            area: "London".to_string(),
+            close_date: "01/01/2027".to_string(),
+            company: "Acme".to_string(),
+            date_applied: "10/10/2026".to_string(),
+            level: 6,
+            notes: "None".to_string(),
+            pay: 25000.5,
+            requirements: "AAB".to_string(),
+            role: "Software Engineer".to_string(),
+            stage: "Applied".to_string(),
+        }
+    }
+
+    #[test]
+    fn open_starts_with_no_listings() {
+        let db = Database::open(":memory:").unwrap();
+
+        assert!(db.list().unwrap().is_empty());
+    }
+
+    #[test]
+    fn insert_stores_every_field() {
+        let db = Database::open(":memory:").unwrap();
+        db.insert(&apprenticeship()).unwrap();
+
+        let listings = db.list().unwrap();
+        assert_eq!(listings.len(), 1);
+
+        let listing = &listings[0];
+        assert_eq!(listing.area, "London");
+        assert_eq!(listing.close_date, "01/01/2027");
+        assert_eq!(listing.company, "Acme");
+        assert_eq!(listing.date_applied, "10/10/2026");
+        assert_eq!(listing.level, 6);
+        assert_eq!(listing.notes, "None");
+        assert_eq!(listing.pay, 25000.5);
+        assert_eq!(listing.requirements, "AAB");
+        assert_eq!(listing.role, "Software Engineer");
+        assert_eq!(listing.stage, "Applied");
+    }
+
+    #[test]
+    fn insert_assigns_distinct_ids() {
+        let db = Database::open(":memory:").unwrap();
+        db.insert(&apprenticeship()).unwrap();
+        db.insert(&apprenticeship()).unwrap();
+
+        let listings = db.list().unwrap();
+        assert_eq!(listings.len(), 2);
+        assert_ne!(listings[0].id, listings[1].id);
+    }
+
+    #[test]
+    fn update_field_changes_only_the_matching_row() {
+        let db = Database::open(":memory:").unwrap();
+        db.insert(&apprenticeship()).unwrap();
+        db.insert(&apprenticeship()).unwrap();
+        let ids: Vec<i64> = db.list().unwrap().iter().map(|l| l.id).collect();
+
+        assert_eq!(
+            db.update_field(Field::Stage, "Interview", ids[0]).unwrap(),
+            1
+        );
+
+        let listings = db.list().unwrap();
+        assert_eq!(listings[0].stage, "Interview");
+        assert_eq!(listings[1].stage, "Applied");
+    }
+
+    #[test]
+    fn update_field_reports_no_change_for_a_missing_id() {
+        let db = Database::open(":memory:").unwrap();
+        db.insert(&apprenticeship()).unwrap();
+
+        assert_eq!(db.update_field(Field::Stage, "Interview", 999).unwrap(), 0);
+        assert_eq!(db.list().unwrap()[0].stage, "Applied");
+    }
+
+    #[test]
+    fn delete_removes_only_the_matching_row() {
+        let db = Database::open(":memory:").unwrap();
+        db.insert(&apprenticeship()).unwrap();
+        db.insert(&apprenticeship()).unwrap();
+        let ids: Vec<i64> = db.list().unwrap().iter().map(|l| l.id).collect();
+
+        assert_eq!(db.delete(ids[0]).unwrap(), 1);
+
+        let listings = db.list().unwrap();
+        assert_eq!(listings.len(), 1);
+        assert_eq!(listings[0].id, ids[1]);
+        assert_eq!(db.delete(ids[0]).unwrap(), 0);
+    }
+}
