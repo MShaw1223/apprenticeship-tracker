@@ -1,58 +1,52 @@
-import { GridBox, ComboBox } from "std-widgets.slint";
+import { ComboBox } from "std-widgets.slint";
+import { Field } from "field.slint";
 import { Input } from "input.slint";
+import { Options } from "options.slint";
 
-export component UpdateForm inherits GridBox {
+export component UpdateForm inherits HorizontalLayout {
     in-out property <string> row-id;
     in-out property <string> field;
     in-out property <string> new-value;
 
-    spacing: 3px;
-    Row {
-        // fetch IDs and show Company name ?
-        row-id := Input {
-            placeholder-text: "Row ID";
+    spacing: 16px;
+
+    // fetch IDs and show Company name ?
+    Field {
+        label: "Listing ID";
+        Input {
+            input-type: number;
             text <=> root.row-id;
         }
+    }
 
-        field := ComboBox {
-            model: ["Company", "Role", "Pay", "Area", "Level", "Grades", "Date Applied", "Stage",
-                // "Close Date"
-            ];
+    Field {
+        label: "Field";
+        ComboBox {
+            model: Options.fields;
             current-value <=> root.field;
+            selected => {
+                root.new-value = "";
+            }
         }
+    }
 
-        new-value-level := ComboBox {
-            model: [0, 4, 5, 6, 7];
+    Field {
+        label: "New value";
+        horizontal-stretch: 2;
+
+        if root.field == "Level": ComboBox {
+            model: Options.levels;
             current-value <=> root.new-value;
-            visible: root.field == "Level";
         }
 
-        new-value-stage := ComboBox {
-            model: [
-                "Offer Received",
-                "Final Interviews",
-                "Assessment Centre",
-                "Online Interviews",
-                "Online Assessments",
-                "Applied",
-                "Interest Registered",
-                "No Action",
-                "Not Applying",
-                "Rejected: Offer Received",
-                "Rejected: Final Interviews",
-                "Rejected: Assessment Centre",
-                "Rejected: Online Interviews",
-                "Rejected: Online Assessments",
-                "Rejected: Applied"
-            ];
+        if root.field == "Stage": ComboBox {
+            model: Options.stages;
             current-value <=> root.new-value;
-            visible: root.field == "Stage";
         }
 
-        new-value-input := Input {
-            placeholder-text: "New Value";
+        if root.field != "Level" && root.field != "Stage": Input {
+            input-type: root.field == "Pay" ? InputType.decimal : InputType.text;
             text <=> root.new-value;
-            visible: root.field != "Level" && root.field != "Stage";
         }
     }
 }

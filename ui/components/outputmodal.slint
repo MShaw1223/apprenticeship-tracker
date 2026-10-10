@@ -1,13 +1,59 @@
-import { GroupBox } from "std-widgets.slint";
-export component Output inherits Text {
-    color: black;
-    font-weight: 550;
-    horizontal-alignment: center;
-    vertical-alignment: center;
-}
+import { Button, Palette } from "std-widgets.slint";
 
-export component OutputModal inherits GroupBox {
-    width: 250px;
-    height: 120px;
-    padding: 20px;
+// Dims the window and shows a message until it is dismissed.
+export component OutputModal inherits Rectangle {
+    in property <string> text;
+
+    callback dismissed;
+
+    background: #00000080;
+
+    // Stops clicks reaching the page underneath
+    TouchArea { }
+
+    VerticalLayout {
+        alignment: center;
+
+        HorizontalLayout {
+            alignment: center;
+
+            Rectangle {
+                width: 380px;
+                background: Palette.background;
+                border-radius: 12px;
+                border-width: 1px;
+                border-color: Palette.border;
+                drop-shadow-blur: 24px;
+                drop-shadow-offset-y: 8px;
+                drop-shadow-color: #00000040;
+
+                VerticalLayout {
+                    padding: 24px;
+                    spacing: 20px;
+
+                    Text {
+                        text: root.text;
+                        font-size: 15px;
+                        font-weight: 500;
+                        color: Palette.foreground;
+                        wrap: word-wrap;
+                        horizontal-alignment: center;
+                    }
+
+                    HorizontalLayout {
+                        alignment: center;
+
+                        Button {
+                            text: "OK";
+                            primary: true;
+                            min-width: 100px;
+                            clicked => {
+                                root.dismissed();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

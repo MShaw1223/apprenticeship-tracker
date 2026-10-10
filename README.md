@@ -33,5 +33,5 @@ src/
     database.rs         SQLite storage
 ui/
   appwindow.slint       the main window
-  components/           forms, table, menu and buttons
+  components/           sidebar, forms, table and dialog
 ```

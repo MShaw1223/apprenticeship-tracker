@@ -1,0 +1,84 @@
+import { Palette } from "std-widgets.slint";
+
+component NavItem inherits Rectangle {
+    in property <string> text;
+    in property <bool> active;
+
+    callback clicked <=> touch.clicked;
+
+    height: 38px;
+    border-radius: 8px;
+    background: root.active ? Palette.accent-background : touch.has-hover ? Palette.foreground.transparentize(0.92) : transparent;
+
+    HorizontalLayout {
+        padding-left: 14px;
+        padding-right: 14px;
+
+        Text {
+            text: root.text;
+            font-size: 14px;
+            font-weight: root.active ? 600 : 400;
+            color: root.active ? Palette.accent-foreground : Palette.foreground;
+            vertical-alignment: center;
+        }
+    }
+
+    touch := TouchArea {
+        mouse-cursor: pointer;
+    }
+}
+
+export component Sidebar inherits Rectangle {
+    in property <string> choice;
+
+    callback navigate(string);
+
+    width: 220px;
+    background: Palette.alternate-background;
+
+    VerticalLayout {
+        padding: 16px;
+        spacing: 6px;
+        alignment: start;
+
+        VerticalLayout {
+            padding-left: 14px;
+            padding-top: 16px;
+            padding-bottom: 20px;
+
+            Text {
+                text: "Apprenticeship";
+                font-size: 20px;
+                font-weight: 700;
+                color: Palette.foreground;
+            }
+
+            Text {
+                text: "Tracker";
+                font-size: 20px;
+                font-weight: 300;
+                color: Palette.foreground;
+            }
+        }
+
+        for item in [
+            { page: "listings", label: "Listings" },
+            { page: "add", label: "Add listing" },
+            { page: "update", label: "Update listing" },
+            { page: "delete", label: "Delete listing" },
+        ]: NavItem {
+            text: item.label;
+            active: root.choice == item.page;
+            clicked => {
+                root.navigate(item.page);
+            }
+        }
+    }
+
+    // Divider between the sidebar and the page
+    Rectangle {
+        x: parent.width - 1px;
+        width: 1px;
+        background: Palette.border;
+    }
+}

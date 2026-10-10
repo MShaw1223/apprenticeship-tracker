@@ -1,91 +1,106 @@
-import { GridBox, ComboBox } from "std-widgets.slint";
+import { ComboBox } from "std-widgets.slint";
+import { Field } from "field.slint";
 import { Input } from "input.slint";
+import { Options } from "options.slint";
 import { TextArea } from "textarea.slint";
 
-export component EntryForm inherits GridBox {
-    spacing: 10px;
-
+export component EntryForm inherits GridLayout {
     in-out property <string> company;
     in-out property <string> role;
     in-out property <string> pay;
     in-out property <string> area;
     in-out property <string> level;
     in-out property <string> requirements;
-    in-out property <string> date_applied;
+    in-out property <string> date-applied;
     in-out property <string> stage;
-    in-out property <string> close_date;
+    in-out property <string> close-date;
     in-out property <string> notes;
 
+    spacing: 16px;
+
     Row {
-        company := Input {
-            placeholder-text: "Company";
-            text <=> root.company;
+        Field {
+            label: "Company";
+            Input {
+                text <=> root.company;
+            }
         }
 
-        role := Input {
-            placeholder-text: "Role";
-            text <=> root.role;
+        Field {
+            label: "Role";
+            Input {
+                text <=> root.role;
+            }
         }
 
-        pay := Input {
-            placeholder-text: "Pay";
-            text <=> root.pay;
+        Field {
+            label: "Area";
+            Input {
+                text <=> root.area;
+            }
         }
 
-        area := Input {
-            placeholder-text: "Area";
-            text <=> root.area;
+        Field {
+            label: "Pay";
+            Input {
+                placeholder-text: "e.g. 25000";
+                input-type: decimal;
+                text <=> root.pay;
+            }
         }
     }
 
     Row {
-        level := ComboBox {
-            model: [0, 4, 5, 6, 7];
-            current-value <=> root.level;
+        Field {
+            label: "Level";
+            ComboBox {
+                model: Options.levels;
+                current-value <=> root.level;
+            }
         }
 
-        requirements := Input {
-            placeholder-text: "Required Grades";
-            text <=> root.requirements;
+        Field {
+            label: "Required grades";
+            Input {
+                text <=> root.requirements;
+            }
         }
+
         // change to a datetime?
-        date_applied := Input {
-            placeholder-text: "Date Applied";
-            text <=> root.date_applied;
+        Field {
+            label: "Date applied";
+            Input {
+                text <=> root.date-applied;
+            }
         }
-       // change to a dropdown?
-        stage := ComboBox {
-            model: [
-                "Offer Received",
-                "Final Interviews",
-                "Assessment Centre",
-                "Online Interviews",
-                "Online Assessments",
-                "Applied",
-                "Interest Registered",
-                "No Action",
-                "Not Applying",
-                "Rejected: Offer Received",
-                "Rejected: Final Interviews",
-                "Rejected: Assessment Centre",
-                "Rejected: Online Interviews",
-                "Rejected: Online Assessments",
-                "Rejected: Applied",
-            ];
-            current-value <=> root.stage;
-        }
+
         // change to a datetime?
-        close_date := Input {
-            placeholder-text: "Close Date";
-            text <=> root.close_date;
+        Field {
+            label: "Close date";
+            Input {
+                text <=> root.close-date;
+            }
         }
     }
 
     Row {
-        notes := TextArea {
-            colspan: 5;
-            placeholder-text: "Notes";
-            text <=> root.notes;
+        Field {
+            label: "Stage";
+            colspan: 2;
+            ComboBox {
+                model: Options.stages;
+                current-value <=> root.stage;
+            }
+        }
+    }
+
+    Row {
+        Field {
+            label: "Notes";
+            colspan: 4;
+            TextArea {
+                text <=> root.notes;
+            }
         }
     }
 }

@@ -22,6 +22,7 @@ fn table_row(appr: Apprenticeship) -> ModelRc<StandardListViewItem> {
         appr.level.to_string(),
         appr.requirements,
         appr.date_applied,
+        appr.close_date,
         appr.stage,
         appr.notes,
     ]
@@ -72,13 +73,15 @@ fn main() -> Result<(), Box<dyn Error>> {
                 stage: stage.into(),
             };
 
-            match apprenticeship::create(&db, input) {
+            let result = apprenticeship::create(&db, input);
+            match &result {
                 Ok(()) => show_output(&ui, "Job recorded !".to_string()),
                 Err(e) => show_output(
                     &ui,
                     format!("Error recording apprenticeship details :(. Error: {}", e),
                 ),
             }
+            result.is_ok()
         }
     });
 
@@ -105,10 +108,12 @@ fn main() -> Result<(), Box<dyn Error>> {
         move |payload| {
             let ui = ui_handle.unwrap();
             let (field, new_value, row_id) = payload;
-            match apprenticeship::update_field(&db, &field, &new_value, &row_id) {
+            let result = apprenticeship::update_field(&db, &field, &new_value, &row_id);
+            match &result {
                 Ok(()) => show_output(&ui, "Information updated !".to_string()),
                 Err(e) => show_output(&ui, format!("Error updating information: {}", e)),
             }
+            result.is_ok()
         }
     });
 
@@ -118,12 +123,17 @@ fn main() -> Result<(), Box<dyn Error>> {
         move |payload| {
             let ui = ui_handle.unwrap();
             let (row_id,) = payload;
-            match apprenticeship::delete(&db, &row_id) {
+            let result = apprenticeship::delete(&db, &row_id);
+            match &result {
                 Ok(()) => show_output(&ui, "Deletion Successful.".to_string()),
                 Err(e) => show_output(&ui, format!("Error deleting job. Error: {}", e)),
             }
+            result.is_ok()
         }
     });
+
+    // The app opens on the listings page, so load them straight away
+    ui.invoke_select_call();
 
     ui.run()?;
     Ok(())

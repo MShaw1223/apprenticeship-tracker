@@ -1,33 +1,36 @@
-import { Button } from "std-widgets.slint";
-import { SubmitButton } from "components/submitbutton.slint";
-import { OutputModal, Output } from "components/outputmodal.slint";
-import { OkButton } from "components/okbutton.slint";
+import { Button, Palette } from "std-widgets.slint";
+import { Card } from "components/card.slint";
 import { EntryForm } from "components/entryform.slint";
-import { UpdateForm } from "components/updateform.slint";
+import { Field } from "components/field.slint";
 import { Input } from "components/input.slint";
-import { Menu } from "components/menu.slint";
+import { OutputModal } from "components/outputmodal.slint";
+import { Page } from "components/page.slint";
+import { Sidebar } from "components/sidebar.slint";
 import { Table } from "components/table.slint";
+import { UpdateForm } from "components/updateform.slint";
 
 export component AppWindow inherits Window {
     in-out property <string> company;
     in-out property <string> role;
     in-out property <string> pay;
     in-out property <string> area;
-    in-out property <string> level: "Level";
+    in-out property <string> level;
     in-out property <string> requirements;
     in-out property <string> date-applied;
-    in-out property <string> stage: "Stage";
+    in-out property <string> stage;
     in-out property <string> close-date;
     in-out property <string> notes;
     in-out property <string> output: "";
     in-out property <bool> show: false;
-    in-out property <string> field: "Edit Field";
+    in-out property <string> field: "Company";
     in-out property <string> new-value;
     in-out property <string> row-id;
     in-out property <string> delete-id;
-    in-out property <string> choice: "Add Listing";
+    // One of "listings", "add", "update" or "delete"
+    in-out property <string> choice: "listings";
     in property <[[StandardListViewItem]]> select-result;
 
+    // The insert, update and delete callbacks return whether the change was saved.
     callback insert-job-call({
         company: string,
         role: string,
@@ -39,56 +42,148 @@ export component AppWindow inherits Window {
         stage: string,
         close-date: string,
         notes: string,
-    });
+    }) -> bool;
     callback select-call();
     callback update-call({
         field: string,
         new-value: string,
         row-id: string,
-    });
+    }) -> bool;
     callback delete-call({
         row-id: string,
-    });
+    }) -> bool;
+
+    function navigate(page: string) {
+        root.choice = page;
+        if (page == "listings") {
+            root.select-call();
+        }
+    }
+
+    function notify(message: string) {
+        root.output = message;
+        root.show = true;
+    }
+
+    function clear-entry() {
+        company = "";
+        role = "";
+        pay = "";
+        area = "";
+        level = "";
+        requirements = "";
+        date-applied = "";
+        stage = "";
+        close-date = "";
+        notes = "";
+    }
 
     title: "Apprenticeship Tracker";
-    min-width: 1300px;
-    min-height: 600px;
+    min-width: 1100px;
+    min-height: 640px;
+    preferred-width: 1300px;
+    preferred-height: 720px;
+    background: Palette.background;
 
-    VerticalLayout {
-        HorizontalLayout {
-            alignment: center;
-            GridLayout {
-                padding-top: 50px;
-                width: 100%;
-                EntryForm {
-                    row: 0;
-                    col: 0;
-                    visible: root.choice == "Add Listing";
+    HorizontalLayout {
+        Sidebar {
+            choice: root.choice;
+            navigate(page) => {
+                root.navigate(page);
+            }
+        }
 
-                    min-height: 200px;
-                    company <=> company;
-                    role <=> role;
-                    pay <=> pay;
-                    area <=> area;
-                    level <=> level;
-                    requirements <=> requirements;
-                    date-applied <=> date-applied;
-                    stage <=> stage;
-                    close-date <=> close-date;
-                    notes <=> notes;
+        VerticalLayout {
+            padding: 32px;
+
+            if root.choice == "listings": Page {
+                title: "Listings";
+                subtitle: root.select-result.length == 0 ? "No listings yet. Add one to get started." : "Select a row to update or delete it.";
+
+                table := Table {
+                    rows: root.select-result;
                 }
 
                 HorizontalLayout {
-                    row: 1;
-                    col: 0;
-                    visible: root.choice == "Add Listing";
-                    alignment: space-around;
-                    SubmitButton {
+                    property <bool> has-selection: table.current-row >= 0 && table.current-row < root.select-result.length;
+
+                    spacing: 10px;
+                    vertical-stretch: 0;
+
+                    Button {
+                        text: "Refresh";
                         clicked => {
-                            if (company != "" && role != "" && pay != "" && area != "" && level != "" && level != "Level" && requirements != "" && date-applied != "" && stage != "" && close-date != "" && notes != "") {
-                                root.output = "Sending Entry";
-                                root.show = true;
-                                root.insert-job-call({
+                            root.select-call();
+                        }
+                    }
+
+                    // Pushes the remaining buttons to the right
+                    Rectangle { }
+
+                    Button {
+                        text: "Update selected";
+                        enabled: has-selection;
+                        clicked => {
+                            root.row-id = root.select-result[table.current-row][0].text;
+                            root.navigate("update");
+                        }
+                    }
+
+                    Button {
+                        text: "Delete selected";
+                        enabled: has-selection;
+                        clicked => {
+                            root.delete-id = root.select-result[table.current-row][0].text;
+                            root.navigate("delete");
+                        }
+                    }
+
+                    Button {
+                        text: "Add listing";
+                        primary: true;
+                        clicked => {
+                            root.navigate("add");
+                        }
+                    }
+                }
+            }
+
+            if root.choice == "add": Page {
+                title: "Add listing";
+                subtitle: "Record an apprenticeship you are interested in or have applied for.";
+
+                Card {
+                    EntryForm {
+                        company <=> root.company;
+                        role <=> root.role;
+                        pay <=> root.pay;
+                        area <=> root.area;
+                        level <=> root.level;
+                        requirements <=> root.requirements;
+                        date-applied <=> root.date-applied;
+                        stage <=> root.stage;
+                        close-date <=> root.close-date;
+                        notes <=> root.notes;
+                    }
+
+                    HorizontalLayout {
+                        spacing: 10px;
+                        alignment: end;
+
+                        Button {
+                            text: "Clear";
+                            clicked => {
+                                root.clear-entry();
+                            }
+                        }
+
+                        Button {
+                            text: "Save listing";
+                            primary: true;
+                            clicked => {
+                                if (company == "" || role == "" || pay == "" || area == "" || level == "" || requirements == "" || date-applied == "" || stage == "" || close-date == "" || notes == "") {
+                                    root.notify("Ensure all fields are entered...");
+                                } else if (root.insert-job-call({
                                     company: company,
                                     role: role,
                                     pay: pay,
@@ -99,143 +194,89 @@ export component AppWindow inherits Window {
                                     stage: stage,
                                     close-date: close-date,
                                     notes: notes,
-                                });
-                                company = "";
-                                role = "";
-                                pay = "";
-                                area = "";
-                                level = "Level";
-                                requirements = "";
-                                date-applied = "";
-                                stage = "";
-                                close-date = "";
-                                notes = "";
-                            } else {
-                                root.output = "Ensure all fields are entered...";
-                                root.show = true;
+                                })) {
+                                    root.clear-entry();
+                                }
                             }
                         }
                     }
                 }
 
-                Table {
-                    row: 0;
-                    col: 0;
-                    visible: root.choice == "View Listings";
-                    rows: select-result;
-                }
-
-                HorizontalLayout {
-                    visible: root.choice == "View Listings";
-                    row: 1;
-                    col: 0;
-                    alignment: space-around;
-                    Button {
-                        text: "Get";
-                        width: 200px;
-                        padding: 5px;
-                        max-height: 20px;
-                        clicked => {
-                            root.select-call();
-                        }
-                    }
-                }
-
-                UpdateForm {
-                    row: 0;
-                    col: 0;
-                    row-id <=> row-id;
-                    field <=> field;
-                    new-value <=> new-value;
-                    visible: root.choice == "Update Listings";
-                }
-
-                HorizontalLayout {
-                    row: 1;
-                    col: 0;
-                    visible: root.choice == "Update Listings";
-                    alignment: space-around;
-                    Button {
-                        text: "Update";
-                        width: 200px;
-                        padding: 5px;
-                        max-height: 20px;
-
-                        clicked => {
-                            if (field == "" || new-value == "" || row-id == "") {
-                                root.output = "Ensure all fields are entered...";
-                                root.show = true;
-                            } else {
-                                root.update-call({ field: field, new-value: new-value, row-id: row-id });
-                                field = "";
-                                new-value = "";
-                                row-id = "";
-                            }
-                        }
-                    }
-                }
-
-                HorizontalLayout {
-                    visible: root.choice == "Delete Listing";
-                    row: 0;
-                    col: 0;
-
-                    spacing: 5px;
-
-                    // Combobox for fetched IDs, use company / role names ??
-                    delete-id := Input {
-                        text <=> root.delete-id;
-                        placeholder-text: "Enter the row ID you wish to delete";
-                    }
-
-                    Button {
-                        text: "Delete";
-                        width: 200px;
-                        padding: 10px;
-                        height: delete-id.height;
-
-                        clicked => {
-                            if (root.delete-id == "") {
-                                root.output = "Ensure all fields are entered...";
-                                root.show = true;
-                            } else {
-                                root.delete-call({ row-id: root.delete-id });
-                                root.delete-id = "";
-                                root.show = true;
-                            }
-                        }
-                    }
-                }
+                Rectangle { }
             }
-        }
 
-        VerticalLayout {
-            padding-bottom: 50px;
-            spacing: 0px;
-            Menu {
-                alignment: end;
-                padding-top: 0;
-                choice <=> choice;
+            if root.choice == "update": Page {
+                title: "Update listing";
+                subtitle: "Change one field of an existing listing.";
+
+                Card {
+                    UpdateForm {
+                        row-id <=> root.row-id;
+                        field <=> root.field;
+                        new-value <=> root.new-value;
+                    }
+
+                    HorizontalLayout {
+                        alignment: end;
+
+                        Button {
+                            text: "Update listing";
+                            primary: true;
+                            clicked => {
+                                if (field == "" || new-value == "" || row-id == "") {
+                                    root.notify("Ensure all fields are entered...");
+                                } else if (root.update-call({ field: field, new-value: new-value, row-id: row-id })) {
+                                    new-value = "";
+                                    row-id = "";
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Rectangle { }
+            }
+
+            if root.choice == "delete": Page {
+                title: "Delete listing";
+                subtitle: "Remove a listing permanently. This cannot be undone.";
+
+                Card {
+                    // Combobox for fetched IDs, use company / role names ??
+                    Field {
+                        label: "Listing ID";
+                        Input {
+                            input-type: number;
+                            text <=> root.delete-id;
+                        }
+                    }
+
+                    HorizontalLayout {
+                        alignment: end;
+
+                        Button {
+                            text: "Delete listing";
+                            primary: true;
+                            clicked => {
+                                if (root.delete-id == "") {
+                                    root.notify("Ensure all fields are entered...");
+                                } else if (root.delete-call({ row-id: root.delete-id })) {
+                                    root.delete-id = "";
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Rectangle { }
             }
         }
     }
 
-    OutputModal {
-        visible: root.show;
-        GridLayout {
-            Row {
-                Output {
-                    text: root.output;
-                }
-            }
-
-            Row {
-                OkButton {
-                    clicked => {
-                        root.show = false;
-                    }
-                }
-            }
+    if root.show: OutputModal {
+        text: root.output;
+        dismissed => {
+            root.show = false;
         }
     }
 }

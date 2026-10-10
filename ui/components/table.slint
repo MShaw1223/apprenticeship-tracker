@@ -1,20 +1,21 @@
 import { StandardTableView } from "std-widgets.slint";
 
 export component Table inherits StandardTableView {
-    width: 100%;
-    height: 300px;
+    min-height: 200px;
+    vertical-stretch: 1;
 
+    // Column order must match table_row in src/main.rs
     columns: [
-        { title: "ID", width: 50px },
-        { title: "Company", width: 100px },
-        { title: "Role", width: 200px },
-        { title: "Pay", width: 70px },
-        { title: "Area", width: 120px },
-        { title: "Level", width: 65px },
-        { title: "Requirements", width: 110px },
-        { title: "Date Applied", width: 105px },
-        { title: "Stage", width: 200px },
-        // { title: "Close Date" },
-        { title: "Notes" },
+        { title: "ID", min-width: 50px },
+        { title: "Company", min-width: 120px, horizontal-stretch: 1 },
+        { title: "Role", min-width: 160px, horizontal-stretch: 2 },
+        { title: "Pay", min-width: 70px },
+        { title: "Area", min-width: 100px, horizontal-stretch: 1 },
+        { title: "Level", min-width: 60px },
+        { title: "Grades", min-width: 80px },
+        { title: "Applied", min-width: 90px },
+        { title: "Closes", min-width: 90px },
+        { title: "Stage", min-width: 160px, horizontal-stretch: 1 },
+        { title: "Notes", min-width: 120px, horizontal-stretch: 2 },
     ];
 }

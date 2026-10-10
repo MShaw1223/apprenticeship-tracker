@@ -1,0 +1,29 @@
+import { Palette } from "std-widgets.slint";
+
+// A heading followed by the content of one section of the app.
+export component Page inherits VerticalLayout {
+    in property <string> title;
+    in property <string> subtitle;
+
+    spacing: 24px;
+
+    VerticalLayout {
+        spacing: 4px;
+        vertical-stretch: 0;
+
+        Text {
+            text: root.title;
+            font-size: 26px;
+            font-weight: 700;
+            color: Palette.foreground;
+        }
+
+        Text {
+            text: root.subtitle;
+            font-size: 14px;
+            color: Palette.foreground.transparentize(0.4);
+        }
+    }
+
+    @children
+}

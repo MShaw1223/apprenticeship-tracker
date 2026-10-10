@@ -1,0 +1,19 @@
+import { Palette } from "std-widgets.slint";
+
+// A form control with a caption above it.
+export component Field inherits VerticalLayout {
+    in property <string> label;
+
+    spacing: 6px;
+    alignment: start;
+    horizontal-stretch: 1;
+
+    Text {
+        text: root.label;
+        font-size: 12px;
+        font-weight: 600;
+        color: Palette.foreground.transparentize(0.4);
+    }
+
+    @children
+}
